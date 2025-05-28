@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const Contacto = () => {
   // Estado para el formulario
@@ -11,7 +12,7 @@ const Contacto = () => {
     asunto: "",
     mensaje: ""
   });
-  
+
   // Estado para mostrar mensaje de éxito
   const [enviado, setEnviado] = useState(false);
 
@@ -29,10 +30,10 @@ const Contacto = () => {
     e.preventDefault();
     // Aquí iría la lógica para enviar el formulario a un backend
     console.log("Formulario enviado:", formData);
-    
+
     // Simulamos el envío exitoso
     setEnviado(true);
-    
+
     // Resetear el formulario
     setFormData({
       nombre: "",
@@ -41,7 +42,7 @@ const Contacto = () => {
       asunto: "",
       mensaje: ""
     });
-    
+
     // Ocultar el mensaje después de 5 segundos
     setTimeout(() => {
       setEnviado(false);
@@ -106,7 +107,9 @@ const Contacto = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -114,14 +117,14 @@ const Contacto = () => {
       {/* Contenido principal */}
       <main className="max-w-6xl mx-auto p-6 my-8">
         <h1 className="text-3xl font-bold text-blue-600 mb-8 text-center">Contacta con Nosotros</h1>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Formulario de contacto */}
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="bg-blue-600 p-4">
               <h2 className="text-xl font-semibold text-white">Escríbenos</h2>
             </div>
-            
+
             <div className="p-6">
               {enviado && (
                 <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -129,7 +132,7 @@ const Contacto = () => {
                   <span className="block sm:inline"> Nos pondremos en contacto contigo lo antes posible.</span>
                 </div>
               )}
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <label htmlFor="nombre" className="block text-gray-700 font-medium mb-2">Nombre completo *</label>
@@ -143,7 +146,7 @@ const Contacto = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
                   <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email *</label>
                   <input
@@ -156,7 +159,7 @@ const Contacto = () => {
                     required
                   />
                 </div>
-                
+
                 <div className="mb-4">
                   <label htmlFor="telefono" className="block text-gray-700 font-medium mb-2">Teléfono</label>
                   <input
@@ -168,7 +171,7 @@ const Contacto = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                   />
                 </div>
-                
+
                 <div className="mb-4">
                   <label htmlFor="asunto" className="block text-gray-700 font-medium mb-2">Asunto *</label>
                   <select
@@ -187,7 +190,7 @@ const Contacto = () => {
                     <option value="otro">Otro</option>
                   </select>
                 </div>
-                
+
                 <div className="mb-4">
                   <label htmlFor="mensaje" className="block text-gray-700 font-medium mb-2">Mensaje *</label>
                   <textarea
@@ -200,7 +203,7 @@ const Contacto = () => {
                     required
                   ></textarea>
                 </div>
-                
+
                 <div className="flex items-center mb-4">
                   <input
                     type="checkbox"
@@ -212,7 +215,7 @@ const Contacto = () => {
                     He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link>
                   </label>
                 </div>
-                
+
                 <button
                   type="submit"
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -222,14 +225,14 @@ const Contacto = () => {
               </form>
             </div>
           </div>
-          
+
           {/* Información de contacto */}
           <div>
             <div className="bg-white shadow-md rounded-lg overflow-hidden mb-8">
               <div className="bg-blue-600 p-4">
                 <h2 className="text-xl font-semibold text-white">Información de contacto</h2>
               </div>
-              
+
               <div className="p-6">
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">{datosEmpresa.nombre}</h3>
@@ -261,7 +264,7 @@ const Contacto = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="border-t border-gray-200 pt-4">
                   <h3 className="text-lg font-semibold text-gray-800 mb-2">Síguenos</h3>
                   <div className="flex space-x-4">
@@ -293,13 +296,13 @@ const Contacto = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Nuestras oficinas */}
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
               <div className="bg-blue-600 p-4">
                 <h2 className="text-xl font-semibold text-white">Nuestras oficinas</h2>
               </div>
-              
+
               <div className="p-6">
                 <div className="space-y-6">
                   {oficinas.map(oficina => (
@@ -310,10 +313,10 @@ const Contacto = () => {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="mt-6">
-                  <Link 
-                    to="/oficinas" 
+                  <Link
+                    to="/oficinas"
                     className="block w-full bg-gray-100 text-gray-700 text-center py-2 rounded-lg hover:bg-gray-200 transition duration-200"
                   >
                     Ver todas las oficinas
@@ -337,4 +340,4 @@ const Contacto = () => {
   );
 };
 
-export default Contacto; 
+export default Contacto;

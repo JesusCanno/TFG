@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const About = () => {
   return (
@@ -30,7 +31,9 @@ const About = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -67,11 +70,11 @@ const About = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Misión, Visión y Valores */}
         <section className="mb-16 bg-white p-8 rounded-lg shadow-md">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Misión, Visión y Valores</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -84,7 +87,7 @@ const About = () => {
                 Facilitar a nuestros clientes la mejor experiencia inmobiliaria, ofreciendo un servicio integral y personalizado, y contribuyendo a que encuentren la vivienda que mejor se adapte a sus necesidades.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,7 +100,7 @@ const About = () => {
                 Convertirnos en la referencia del sector inmobiliario en España, siendo reconocidos por nuestra excelencia, profesionalidad y compromiso con la innovación y la satisfacción del cliente.
               </p>
             </div>
-            
+
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,11 +114,11 @@ const About = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Equipo directivo */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Nuestro Equipo Directivo</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
@@ -127,7 +130,7 @@ const About = () => {
                 Con más de 20 años de experiencia en el sector inmobiliario, Carlos fundó Vivius con la visión de ofrecer un servicio inmobiliario diferente.
               </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
                 <p className="text-gray-500 italic flex items-center justify-center h-full">Foto</p>
@@ -138,7 +141,7 @@ const About = () => {
                 Laura supervisa todas las operaciones de Vivius, asegurando la excelencia en el servicio y la satisfacción de nuestros clientes.
               </p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 overflow-hidden">
                 <p className="text-gray-500 italic flex items-center justify-center h-full">Foto</p>
@@ -151,34 +154,34 @@ const About = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Datos y cifras */}
         <section className="mb-16 bg-blue-600 text-white p-10 rounded-lg">
           <h2 className="text-3xl font-bold mb-8 text-center">Vivius en cifras</h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold mb-2">+5,000</div>
               <div className="text-lg">Propiedades vendidas</div>
             </div>
-            
+
             <div>
               <div className="text-4xl font-bold mb-2">15</div>
               <div className="text-lg">Oficinas en España</div>
             </div>
-            
+
             <div>
               <div className="text-4xl font-bold mb-2">+200</div>
               <div className="text-lg">Profesionales</div>
             </div>
-            
+
             <div>
               <div className="text-4xl font-bold mb-2">97%</div>
               <div className="text-lg">Clientes satisfechos</div>
             </div>
           </div>
         </section>
-        
+
         {/* Responsabilidad social */}
         <section className="mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -199,7 +202,7 @@ const About = () => {
             </div>
           </div>
         </section>
-        
+
         {/* CTA */}
         <section className="bg-gray-100 p-10 rounded-lg text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">¿Quieres formar parte de Vivius?</h2>
@@ -229,4 +232,4 @@ const About = () => {
   );
 };
 
-export default About; 
+export default About;

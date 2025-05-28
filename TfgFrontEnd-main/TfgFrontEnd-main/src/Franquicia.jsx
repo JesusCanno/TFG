@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const Franquicia = () => {
   return (
@@ -30,7 +31,9 @@ const Franquicia = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -53,7 +56,7 @@ const Franquicia = () => {
         {/* Ventajas */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">¿Por qué elegir nuestra franquicia?</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
@@ -64,7 +67,7 @@ const Franquicia = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Modelo de negocio probado</h3>
               <p className="text-gray-600">Un modelo de negocio con más de 10 años de experiencia y resultados demostrados en el sector inmobiliario.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,7 +79,7 @@ const Franquicia = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Formación continua</h3>
               <p className="text-gray-600">Programa completo de formación inicial y continua para ti y tu equipo, con las últimas tendencias del sector.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +89,7 @@ const Franquicia = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Tecnología avanzada</h3>
               <p className="text-gray-600">Acceso a nuestro software exclusivo de gestión inmobiliaria y herramientas digitales de última generación.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -96,7 +99,7 @@ const Franquicia = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Marketing y publicidad</h3>
               <p className="text-gray-600">Campañas de marketing nacional y local, presencia en portales inmobiliarios y estrategias de posicionamiento.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,7 +109,7 @@ const Franquicia = () => {
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Soporte continuo</h3>
               <p className="text-gray-600">Equipo de soporte dedicado para ayudarte en cada etapa de tu negocio, desde la apertura hasta la operación diaria.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -118,15 +121,15 @@ const Franquicia = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Pasos para abrir una franquicia */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">¿Cómo abrir tu franquicia?</h2>
-          
+
           <div className="relative">
             {/* Línea de tiempo vertical */}
             <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-200"></div>
-            
+
             <div className="space-y-12">
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
@@ -138,7 +141,7 @@ const Franquicia = () => {
                 </div>
                 <div className="md:w-1/2 md:pl-12 hidden md:block"></div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 hidden md:block"></div>
                 <div className="z-10 flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
@@ -149,7 +152,7 @@ const Franquicia = () => {
                   <p className="text-gray-600">Te presentaremos detalladamente nuestro modelo de negocio, condiciones y ventajas de nuestra franquicia.</p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
                   <h3 className="text-xl font-semibold text-blue-600 mb-2">3. Estudio de viabilidad</h3>
@@ -160,7 +163,7 @@ const Franquicia = () => {
                 </div>
                 <div className="md:w-1/2 md:pl-12 hidden md:block"></div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 hidden md:block"></div>
                 <div className="z-10 flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
@@ -171,7 +174,7 @@ const Franquicia = () => {
                   <p className="text-gray-600">Una vez acordadas las condiciones, procederemos a la firma del contrato de franquicia.</p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 md:text-right mb-4 md:mb-0">
                   <h3 className="text-xl font-semibold text-blue-600 mb-2">5. Formación inicial</h3>
@@ -182,7 +185,7 @@ const Franquicia = () => {
                 </div>
                 <div className="md:w-1/2 md:pl-12 hidden md:block"></div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center">
                 <div className="md:w-1/2 md:pr-12 hidden md:block"></div>
                 <div className="z-10 flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full">
@@ -196,48 +199,48 @@ const Franquicia = () => {
             </div>
           </div>
         </section>
-        
+
         {/* Preguntas frecuentes */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Preguntas frecuentes</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Cuál es la inversión inicial?</h3>
               <p className="text-gray-600">La inversión inicial varía según la ubicación y el tamaño del local, pero incluye el canon de entrada, adecuación del local y equipamiento. Te proporcionaremos un desglose detallado durante la presentación del modelo.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Necesito experiencia en el sector inmobiliario?</h3>
               <p className="text-gray-600">No es imprescindible, aunque se valora positivamente. Proporcionamos formación completa y continua para que puedas gestionar tu franquicia con éxito independientemente de tu experiencia previa.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Cuál es la duración del contrato?</h3>
               <p className="text-gray-600">Los contratos tienen una duración inicial de 5 años, renovables por periodos similares. Buscamos relaciones a largo plazo con nuestros franquiciados.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Cuáles son las regalías mensuales?</h3>
               <p className="text-gray-600">Las regalías mensuales corresponden a un porcentaje sobre la facturación, que incluye el uso de la marca, soporte continuo y actualizaciones del sistema. El porcentaje exacto se detalla en la presentación del modelo.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Qué territorios están disponibles?</h3>
               <p className="text-gray-600">Actualmente tenemos disponibilidad en diversas zonas de España. Durante el proceso de solicitud analizaremos la viabilidad de tu zona de interés y la exclusividad territorial.</p>
             </div>
-            
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">¿Cuánto tiempo tarda la apertura?</h3>
               <p className="text-gray-600">El tiempo estimado desde la firma del contrato hasta la apertura es de aproximadamente 2-3 meses, dependiendo de factores como la disponibilidad del local y los trámites administrativos.</p>
             </div>
           </div>
         </section>
-        
+
         {/* Formulario de contacto */}
         <section id="contacto" className="bg-white p-8 rounded-lg shadow-lg scroll-mt-24">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Solicita información</h2>
-          
+
           <form>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -250,7 +253,7 @@ const Franquicia = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email *</label>
                 <input
@@ -261,7 +264,7 @@ const Franquicia = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="telefono" className="block text-gray-700 font-medium mb-2">Teléfono *</label>
                 <input
@@ -272,7 +275,7 @@ const Franquicia = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="ciudad" className="block text-gray-700 font-medium mb-2">Ciudad de interés *</label>
                 <input
@@ -284,7 +287,7 @@ const Franquicia = () => {
                 />
               </div>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="mensaje" className="block text-gray-700 font-medium mb-2">Mensaje (opcional)</label>
               <textarea
@@ -294,7 +297,7 @@ const Franquicia = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
               ></textarea>
             </div>
-            
+
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
@@ -306,7 +309,7 @@ const Franquicia = () => {
                 He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link> y autorizo el tratamiento de mis datos.
               </label>
             </div>
-            
+
             <button
               type="submit"
               className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -329,4 +332,4 @@ const Franquicia = () => {
   );
 };
 
-export default Franquicia; 
+export default Franquicia;

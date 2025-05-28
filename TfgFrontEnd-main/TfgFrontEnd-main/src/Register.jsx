@@ -24,12 +24,12 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Validar nombre
     if (!formData.name.trim()) {
       newErrors.name = "El nombre es obligatorio";
     }
-    
+
     // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email.trim()) {
@@ -37,19 +37,19 @@ const Register = () => {
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Introduce un email válido";
     }
-    
+
     // Validar contraseña
     if (!formData.password) {
       newErrors.password = "La contraseña es obligatoria";
     } else if (formData.password.length < 6) {
       newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
-    
+
     // Validar confirmación de contraseña
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -100,7 +100,9 @@ const Register = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -112,13 +114,13 @@ const Register = () => {
             <h1 className="text-2xl font-bold text-gray-800">Crear cuenta</h1>
             <p className="text-gray-600 mt-2">Regístrate para gestionar tus propiedades favoritas</p>
           </div>
-          
+
           {successMessage && (
             <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
               <p className="text-green-700">{successMessage}</p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 font-medium mb-2">Nombre completo*</label>
@@ -132,7 +134,7 @@ const Register = () => {
               />
               {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email*</label>
               <input
@@ -145,7 +147,7 @@ const Register = () => {
               />
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
-            
+
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium mb-2">Contraseña*</label>
               <input
@@ -159,7 +161,7 @@ const Register = () => {
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
               <p className="text-gray-500 text-xs mt-1">Mínimo 6 caracteres</p>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">Confirmar contraseña*</label>
               <input
@@ -172,7 +174,7 @@ const Register = () => {
               />
               {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
             </div>
-            
+
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
@@ -184,7 +186,7 @@ const Register = () => {
                 He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link>
               </label>
             </div>
-            
+
             <button
               type="submit"
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -192,7 +194,7 @@ const Register = () => {
               Registrarse
             </button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-gray-600">¿Ya tienes cuenta? <Link to="/login" className="text-blue-600 hover:underline">Inicia sesión</Link></p>
           </div>
@@ -211,4 +213,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

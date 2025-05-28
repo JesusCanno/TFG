@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const Oficinas = () => {
   // Datos de las oficinas en Madrid
@@ -40,12 +41,12 @@ const Oficinas = () => {
   // Función para construir la URL del mapa con marcadores
   const buildMapUrl = () => {
     let baseUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d24275.771557994225!2d-3.7099548741789345!3d40.428938942594354!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd42285e0b7c6447%3A0xa03bedb7e6db21a0!2sGran%20V%C3%ADa%2C%2042%2C%2028013%20Madrid!5e0!3m2!1ses!2ses!4v1651162847354!5m2!1ses!2ses";
-    
+
     // Añadir marcadores a la URL
     oficinas.forEach(oficina => {
       baseUrl += `&markers=color:blue%7Clabel:V%7C${oficina.coordenadas.lat},${oficina.coordenadas.lng}`;
     });
-    
+
     return baseUrl;
   };
 
@@ -76,7 +77,9 @@ const Oficinas = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -84,18 +87,18 @@ const Oficinas = () => {
       {/* Contenido principal */}
       <main className="max-w-6xl mx-auto p-6 mt-8 mb-12">
         <h1 className="text-3xl font-bold text-blue-600 mb-8 text-center">Nuestras Oficinas en Madrid</h1>
-        
+
         {/* Mapa */}
         <div className="bg-white shadow-md rounded-lg overflow-hidden mb-12">
           <div className="relative" style={{ height: "500px" }}>
             {/* Iframe con el mapa de Google Maps con marcadores en las ubicaciones */}
-            <iframe 
-              src={buildMapUrl()} 
-              width="100%" 
-              height="100%" 
-              style={{ border: 0 }} 
-              allowFullScreen="" 
-              loading="lazy" 
+            <iframe
+              src={buildMapUrl()}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Mapa de oficinas Vivius en Madrid"
             ></iframe>
@@ -105,8 +108,8 @@ const Oficinas = () => {
               <h3 className="text-lg font-semibold text-blue-600 mb-2">Oficinas Vivius</h3>
               <ul className="text-sm space-y-2">
                 {oficinas.map(oficina => (
-                  <li 
-                    key={oficina.id} 
+                  <li
+                    key={oficina.id}
                     className="flex items-center cursor-pointer hover:bg-blue-50 p-2 rounded transition"
                     onClick={() => setOficinaSeleccionada(oficina)}
                   >
@@ -124,7 +127,7 @@ const Oficinas = () => {
               <div className="absolute bottom-4 left-4 bg-white shadow-lg rounded-lg p-4 z-10 max-w-sm">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="text-lg font-semibold text-blue-600">{oficinaSeleccionada.nombre}</h3>
-                  <button 
+                  <button
                     onClick={() => setOficinaSeleccionada(null)}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -133,9 +136,9 @@ const Oficinas = () => {
                 </div>
                 <p className="text-sm text-gray-700 mb-2">{oficinaSeleccionada.direccion}</p>
                 <p className="text-sm text-gray-700 mb-2">Tel: {oficinaSeleccionada.telefono}</p>
-                <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${oficinaSeleccionada.direccion}`} 
-                  target="_blank" 
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${oficinaSeleccionada.direccion}`}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-blue-100 text-blue-600 text-center py-2 rounded-lg hover:bg-blue-200 transition duration-200 text-sm"
                 >
@@ -149,8 +152,8 @@ const Oficinas = () => {
         {/* Listado de oficinas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {oficinas.map(oficina => (
-            <div 
-              key={oficina.id} 
+            <div
+              key={oficina.id}
               className={`bg-white shadow-md rounded-lg overflow-hidden transition-all duration-200 ${oficinaSeleccionada?.id === oficina.id ? 'ring-2 ring-blue-500' : ''}`}
             >
               <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
@@ -179,15 +182,15 @@ const Oficinas = () => {
                   </div>
                 </div>
                 <div className="mt-6 flex space-x-2">
-                  <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${oficina.direccion}`} 
-                    target="_blank" 
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${oficina.direccion}`}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full bg-blue-100 text-blue-600 text-center py-2 rounded-lg hover:bg-blue-200 transition duration-200"
                   >
                     Cómo llegar
                   </a>
-                  <button 
+                  <button
                     onClick={() => setOficinaSeleccionada(oficina)}
                     className="block w-1/3 bg-yellow-100 text-yellow-600 text-center py-2 rounded-lg hover:bg-yellow-200 transition duration-200"
                   >
@@ -212,4 +215,4 @@ const Oficinas = () => {
   );
 };
 
-export default Oficinas; 
+export default Oficinas;

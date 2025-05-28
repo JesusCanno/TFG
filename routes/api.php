@@ -3,6 +3,8 @@
 use App\Http\Controllers\controladorInmueble;
 use App\Http\Controllers\controladorUsuario;
 use App\Http\Controllers\controladorContacto;
+use App\Http\Controllers\FavoritoController;
+use App\Http\Controllers\SolicitudNegocioController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +51,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mis-contactos', [controladorContacto::class, 'index'])->middleware('rol:negocio');
     Route::put('/contacto/{id}/leido', [controladorContacto::class, 'marcarLeido'])->middleware('rol:negocio');
 
+    // Rutas de favoritos
+    Route::get('/favoritos', [FavoritoController::class, 'index']);
+    Route::post('/favoritos', [FavoritoController::class, 'store']);
+    Route::delete('/favoritos/{inmueble_id}', [FavoritoController::class, 'destroy']);
+
     // Rutas de administrador
     Route::middleware('rol:admin')->group(function () {
         Route::get('/usuarios', [controladorUsuario::class, 'usuarios']);
@@ -57,5 +64,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}', [controladorUsuario::class, 'actualizarUsuario']);
         Route::delete('/users/{id}', [controladorUsuario::class, 'eliminarUsuario']);
     });
+
+    // Rutas de solicitudes de negocio
+    Route::get('/solicitudes-negocio', [SolicitudNegocioController::class, 'index']);
+    Route::post('/solicitud-negocio', [SolicitudNegocioController::class, 'store']);
+    Route::post('/solicitud-negocio/{id}/aprobar', [SolicitudNegocioController::class, 'aprobar']);
+    Route::delete('/solicitud-negocio/{id}/rechazar', [SolicitudNegocioController::class, 'rechazar']);
 });
 

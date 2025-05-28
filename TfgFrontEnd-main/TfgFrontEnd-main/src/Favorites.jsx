@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { navigateToHome } from "./general";
-import propertyService from './services/propertyService';
+import favoriteService from './services/favoriteService';
+import { getImageUrl } from './config';
+import authService from "./services/authService";
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);
-  const [userData, setUserData] = useState(null);
+  const [favoriteAnimation, setFavoriteAnimation] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,14 +16,22 @@ const Favorites = () => {
       navigate('/login');
       return;
     }
-    propertyService.getFavorites()
-      .then(setFavorites)
+    favoriteService.getFavorites()
+      .then((data) => {
+        // El backend devuelve un array de objetos Favorito con la relación inmueble
+        setFavorites(data.map(fav => fav.inmueble));
+      })
       .catch(() => setFavorites([]));
   }, [navigate]);
 
   const removeFavorite = async (id) => {
     try {
-      await propertyService.removeFromFavorites(id);
+      // Activa la animación
+      setFavoriteAnimation(prev => ({ ...prev, [id]: true }));
+      setTimeout(() => {
+        setFavoriteAnimation(prev => ({ ...prev, [id]: false }));
+      }, 1200);
+      await favoriteService.removeFavorite(id);
       setFavorites(favorites.filter(fav => fav.id !== id));
     } catch (error) {
       // Manejo de error
@@ -55,7 +65,9 @@ const Favorites = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -68,7 +80,6 @@ const Favorites = () => {
               <h1 className="text-2xl font-bold">Mis Favoritos</h1>
               <p className="mt-1">Propiedades que has guardado como favoritas</p>
             </div>
-            
             <div className="p-6">
               {/* Contenido principal */}
               <div className="w-full">
@@ -85,47 +96,69 @@ const Favorites = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {favorites.map((property) => (
-                      <div key={property.id} className="bg-white border rounded-lg shadow-sm overflow-hidden flex">
-                        {/* Imagen del apartamento */}
-                        <div
-                          className="w-1/3 h-40 bg-cover bg-center"
-                          style={{ backgroundImage: `url(${property.foto})` }}
-                        ></div>
-                        
-                        {/* Detalles del apartamento */}
-                        <div className="w-2/3 p-4 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start">
-                              <h3 className="text-lg font-semibold text-gray-800">{property.nombre}</h3>
-                              <button 
-                                onClick={() => removeFavorite(property.id)} 
-                                className="text-red-500 hover:text-red-700"
-                                aria-label="Eliminar de favoritos"
-                              >
-                                <span className="text-xl">❤</span>
-                              </button>
-                            </div>
-                            <p className="text-sm text-gray-600 mt-1">{property.ubicacion}</p>
+                    {favorites.map((property) => {
+                      const isFav = true; // Siempre true en favoritos
+                      const destacado = property.destacado;
+                      const bordeClass = destacado && isFav
+                        ? 'border-l-4 border-gradient-gold-red animate-glow-gold-red'
+                        : destacado
+                        ? 'border-l-4 border-yellow-400 animate-glow-gold'
+                        : isFav
+                        ? 'border-l-4 border-red-500 animate-glow-red'
+                        : '';
+                      return (
+                        <div key={property.id} className={`bg-white border rounded-lg shadow-sm overflow-hidden flex ${bordeClass} ${favoriteAnimation[property.id] ? 'animate-pulse' : ''}`}>
+                          {/* Imagen del apartamento */}
+                          <div
+                            className={`w-1/3 h-40 bg-cover bg-center relative transition-all duration-500`}
+                            style={{ backgroundImage: `url(${getImageUrl(property.foto)})` }}
+                          >
+                            {destacado && isFav ? (
+                              <div className={`absolute top-2 left-2 px-2 py-1 rounded font-bold text-xs flex items-center z-10 transition-all duration-500 bg-gradient-to-r from-yellow-400 via-yellow-400 to-red-500 text-white border border-red-500 animate-glow-gold-red ${favoriteAnimation[property.id] ? 'animate-pulse' : ''}`}>
+                                <span className="mr-1">★</span> Destacado y Favorito
+                              </div>
+                            ) : destacado ? (
+                              <div className="absolute top-2 left-2 bg-yellow-400 text-white px-2 py-1 rounded font-bold text-xs flex items-center z-10 animate-glow-gold">
+                                <span className="mr-1">★</span> Destacado
+                              </div>
+                            ) : isFav ? (
+                              <div className={`absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded font-bold text-xs flex items-center z-10 animate-glow-red ${favoriteAnimation[property.id] ? 'animate-pulse' : ''}`}>
+                                <span className="mr-1">❤</span> Favorito
+                              </div>
+                            ) : null}
                           </div>
-                          
-                          <div className="mt-4 flex justify-between text-sm">
+                          {/* Detalles del apartamento */}
+                          <div className="w-2/3 p-4 flex flex-col justify-between">
                             <div>
-                              <span className="font-medium text-gray-700">{property.precio}</span>
+                              <div className="flex justify-between items-start">
+                                <h3 className="text-lg font-semibold text-gray-800">{property.titulo}</h3>
+                                <button
+                                  onClick={() => removeFavorite(property.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                  aria-label="Eliminar de favoritos"
+                                >
+                                  <span className="text-xl">❤</span>
+                                </button>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{property.direccion}</p>
                             </div>
-                            <div>
-                              <span className="text-gray-600">{property.area} | {property.habitaciones} hab.</span>
+                            <div className="mt-4 flex justify-between text-sm">
+                              <div>
+                                <span className="font-medium text-gray-700">{property.precio} €</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">{property.metro} m² | {property.habitacion} hab.</span>
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="mt-4">
-                            <Link to="/" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                              Ver detalles
-                            </Link>
+                            <div className="mt-4">
+                              <Link to={`/inmueble/${property.id}`} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Ver detalles
+                              </Link>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -133,7 +166,6 @@ const Favorites = () => {
           </div>
         </div>
       </main>
-
       {/* Pie de página */}
       <footer className="bg-blue-600 text-white py-4 mt-auto">
         <ul className="flex justify-center space-x-6">
@@ -146,4 +178,43 @@ const Favorites = () => {
   );
 };
 
-export default Favorites; 
+/* Animaciones y gradientes personalizados */
+<style jsx>{`
+  .animate-glow-gold {
+    box-shadow: 0 0 16px 4px #ffd70099, 0 0 4px 2px #ffd70066;
+    animation: goldGlow 1.5s infinite alternate;
+  }
+  @keyframes goldGlow {
+    from { box-shadow: 0 0 8px 2px #ffd70066; }
+    to { box-shadow: 0 0 24px 8px #ffd700cc; }
+  }
+  .border-gradient-gold-red {
+    border-image: linear-gradient(90deg, #ffd700 0%, #ff0000 100%);
+    border-image-slice: 1;
+  }
+  .animate-glow-gold-red {
+    box-shadow: 0 0 16px 4px #ffd70099, 0 0 8px 2px #ff000099;
+    animation: goldRedGlow 1.5s infinite alternate;
+  }
+  @keyframes goldRedGlow {
+    from { box-shadow: 0 0 8px 2px #ffd70066, 0 0 4px 2px #ff000066; }
+    to { box-shadow: 0 0 24px 8px #ffd700cc, 0 0 12px 4px #ff0000cc; }
+  }
+  .animate-glow-red {
+    box-shadow: 0 0 16px 4px #ff000099, 0 0 4px 2px #ff000066;
+    animation: redGlow 1.5s infinite alternate;
+  }
+  @keyframes redGlow {
+    from { box-shadow: 0 0 8px 2px #ff000066; }
+    to { box-shadow: 0 0 24px 8px #ff0000cc; }
+  }
+  .animate-pulse {
+    animation: pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1);
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+  }
+`}</style>
+
+export default Favorites;

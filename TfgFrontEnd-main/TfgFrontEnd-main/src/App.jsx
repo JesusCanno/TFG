@@ -6,6 +6,9 @@ import propertyService from './services/fixed-propertyService'; // Importamos la
 import authService from './services/authService';
 import "./App.css";
 import { getImageUrl } from './config';
+import { favoriteService } from './services';
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 const App = () => {
   const navigate = useNavigate();
@@ -25,6 +28,9 @@ const App = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [userRole, setUserRole] = useState(null);
+  const [favoriteAnimation, setFavoriteAnimation] = useState({});
+  const [showMap, setShowMap] = useState(false);
+  const [selectedApartment, setSelectedApartment] = useState(null);
 
   useEffect(() => {
     // Verificar si hay una sesión activa
@@ -32,14 +38,14 @@ const App = () => {
     if (token) {
       setIsLoggedIn(true);
       setUserRole(authService.getUserRole());
-      // Cargar favoritos del usuario
-      const userFavorites = localStorage.getItem('favorites');
-      if (userFavorites) {
-        setFavorites(JSON.parse(userFavorites));
-      }
+      // Cargar favoritos del usuario desde la API
+      favoriteService.getFavorites().then(data => {
+        setFavorites(data.map(fav => fav.inmueble));
+      });
     } else {
       setIsLoggedIn(false);
       setUserRole(null);
+      setFavorites([]);
     }
   }, []);
 
@@ -81,25 +87,24 @@ const App = () => {
     }));
   };
 
-  const toggleFavorite = (apartment) => {
+  const toggleFavorite = async (apartment) => {
     if (!isLoggedIn) {
       setShowLoginModal(true);
       return;
     }
-
-    const currentFavorites = [...favorites];
-    const index = currentFavorites.findIndex(fav => fav.id === apartment.id);
-    
-    if (index !== -1) {
-      // Eliminar de favoritos
-      currentFavorites.splice(index, 1);
+    const isFav = favorites.some(fav => fav.id === apartment.id);
+    // Activa la animación
+    setFavoriteAnimation(prev => ({ ...prev, [apartment.id]: true }));
+    setTimeout(() => {
+      setFavoriteAnimation(prev => ({ ...prev, [apartment.id]: false }));
+    }, 1200); // Duración de la animación
+    if (isFav) {
+      await favoriteService.removeFavorite(apartment.id);
+      setFavorites(favorites.filter(fav => fav.id !== apartment.id));
     } else {
-      // Añadir a favoritos
-      currentFavorites.push(apartment);
+      await favoriteService.addFavorite(apartment.id);
+      setFavorites([...favorites, apartment]);
     }
-    
-    setFavorites(currentFavorites);
-    localStorage.setItem('favorites', JSON.stringify(currentFavorites));
   };
 
   const isFavorite = (id) => {
@@ -110,6 +115,81 @@ const App = () => {
     setShowLoginModal(false);
     navigate('/login');
   };
+
+  // Añadir función para obtener coordenadas desde la dirección usando Nominatim
+  async function getCoordsFromAddress(address) {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+    }
+    return null;
+  }
+
+  // Restaurar handleShowMap para solo mostrar el seleccionado (y el resto solo si ya tienen coordenadas)
+  const handleShowMap = async (apartment) => {
+    let coords = apartment.coordenadas;
+    if (!coords) {
+      coords = await getCoordsFromAddress(apartment.direccion);
+    }
+    setSelectedApartment({ ...apartment, coordenadas: coords });
+    setShowMap(true);
+  };
+
+  useEffect(() => {
+    if (showMap && selectedApartment) {
+      // Elimina cualquier mapa anterior
+      if (window._leafletMap) {
+        window._leafletMap.remove();
+        window._leafletMap = null;
+      }
+      // Coordenadas de la propiedad seleccionada (simulación: deberías tener lat/lng en apartment)
+      const mainCoords = selectedApartment.coordenadas || { lat: 40.4168, lng: -3.7038 };
+      const map = L.map("map").setView([mainCoords.lat, mainCoords.lng], 13);
+      window._leafletMap = map;
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
+      // Icono de casa
+      const houseIcon = L.icon({
+        iconUrl: "/logoSinFondo.png",
+        iconSize: [90, 90],
+        iconAnchor: [45, 90],
+        popupAnchor: [0, -90],
+      });
+      // Marcador principal
+      L.marker([mainCoords.lat, mainCoords.lng], { icon: houseIcon })
+        .addTo(map)
+        .bindPopup(`<b>${selectedApartment.titulo}</b><br>${selectedApartment.direccion}`)
+        .openPopup();
+      // Marcadores del resto de propiedades
+      filteredApartments.forEach((apt) => {
+        if (apt.id !== selectedApartment.id && apt.coordenadas) {
+          L.marker([apt.coordenadas.lat, apt.coordenadas.lng], {
+            icon: L.icon({
+              iconUrl: "/marker-icon.png",
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+              popupAnchor: [0, -41],
+            }),
+          })
+            .addTo(map)
+            .bindPopup(`<b>${apt.titulo}</b><br>${apt.direccion}`);
+        }
+      });
+    }
+    // Cleanup
+    return () => {
+      if (window._leafletMap) {
+        window._leafletMap.remove();
+        window._leafletMap = null;
+      }
+    };
+  }, [showMap, selectedApartment, filteredApartments]);
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen">
@@ -146,13 +226,13 @@ const App = () => {
           />
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
-          {isLoggedIn && userRole === 'negocio' && (
-            <Link to="/business-dashboard" className="text-gray-600 hover:text-blue-600 font-medium">
-              Panel de negocio
-            </Link>
+          {(!userRole || (userRole !== 'negocio' && userRole !== 'admin')) && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
           )}
-          {isLoggedIn ? (
+          {authService.isAuthenticated() && authService.getUserRole() === 'negocio' && (
+            <Link to="/business-dashboard" className="text-gray-600 hover:text-blue-600 font-medium">Panel de negocio</Link>
+          )}
+          {authService.isAuthenticated() ? (
             <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
           ) : (
             <Link to="/login" className="text-gray-600 hover:text-blue-600">Iniciar sesión</Link>
@@ -309,16 +389,30 @@ const App = () => {
               filteredApartments.map((apartment) => (
                 <div
                   key={apartment.id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row mx-auto mb-8"
+                  className={`bg-white rounded-lg shadow-md overflow-hidden flex flex-col sm:flex-row mx-auto mb-8 relative transition-all duration-500 ${apartment.destacado && isFavorite(apartment.id) ? 'border-4 border-gradient-gold-red animate-glow-gold-red' : apartment.destacado ? 'border-4 border-yellow-400 shadow-yellow-200 animate-glow-gold' : isFavorite(apartment.id) ? 'border-4 border-red-500 animate-glow-red' : ''} ${favoriteAnimation[apartment.id] ? 'animate-pulse' : ''}`}
                   style={{ width: "100%" }}
                 >
                   {/* Imagen del apartamento */}
                   <div
-                    className="w-full h-full sm:w-1/3 h-48 bg-cover bg-center"
-                    style={{ 
-                      backgroundImage: `url(${getImageUrl(apartment.foto)})` 
+                    className="w-full h-full sm:w-1/3 h-48 bg-cover bg-center relative"
+                    style={{
+                      backgroundImage: `url(${getImageUrl(apartment.foto)})`
                     }}
-                  ></div>
+                  >
+                    {apartment.destacado && isFavorite(apartment.id) ? (
+                      <div className={`absolute top-2 left-2 px-3 py-1 rounded shadow font-bold text-xs flex items-center z-10 transition-all duration-500 bg-gradient-to-r from-yellow-400 via-yellow-400 to-red-500 text-white border border-red-500 animate-glow-gold-red ${favoriteAnimation[apartment.id] ? 'animate-pulse' : ''}`}>
+                        <span className="mr-1">★</span> Destacado
+                      </div>
+                    ) : apartment.destacado ? (
+                      <div className="absolute top-2 left-2 bg-yellow-400 text-white px-3 py-1 rounded shadow font-bold text-xs flex items-center z-10 animate-glow-gold">
+                        <span className="mr-1">★</span> Destacado
+                      </div>
+                    ) : isFavorite(apartment.id) ? (
+                      <div className={`absolute top-2 left-2 bg-red-500 text-white px-3 py-1 rounded shadow font-bold text-xs flex items-center z-10 animate-glow-red ${favoriteAnimation[apartment.id] ? 'animate-pulse' : ''}`}>
+                        <span className="mr-1">❤</span> Favorito
+                      </div>
+                    ) : null}
+                  </div>
 
                   {/* Detalles del apartamento */}
                   <div className="w-full sm:w-2/3 p-4 flex flex-col justify-between">
@@ -327,13 +421,13 @@ const App = () => {
                       <Link to={`/inmueble/${apartment.id}`} className="text-xl font-semibold text-gray-800 hover:underline">
                         {apartment.titulo}
                       </Link>
-                      <button 
+                      <button
                         onClick={() => toggleFavorite(apartment)}
                         className="text-2xl focus:outline-none"
                         aria-label={isFavorite(apartment.id) ? "Quitar de favoritos" : "Añadir a favoritos"}
                       >
-                        {isFavorite(apartment.id) ? 
-                          <span className="text-red-500">❤</span> : 
+                        {isFavorite(apartment.id) ?
+                          <span className="text-red-500">❤</span> :
                           <span className="text-gray-400">♡</span>
                         }
                       </button>
@@ -358,7 +452,10 @@ const App = () => {
                     {/* Dirección y botón */}
                     <div className="flex items-center mt-4">
                       <p className="text-gray-600">{apartment.direccion}</p>
-                      <button className="ml-4 bg-blue-500 text-white p-2 rounded-full flex items-center justify-center">
+                      <button
+                        className="ml-4 bg-blue-500 text-white p-2 rounded-full flex items-center justify-center"
+                        onClick={() => handleShowMap(apartment)}
+                      >
                         <i className="fas fa-map-marker-alt">Ver en el mapa</i>
                       </button>
                     </div>
@@ -385,19 +482,35 @@ const App = () => {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Inicia sesión para continuar</h3>
             <p className="text-gray-600 mb-6">Para añadir propiedades a tus favoritos, necesitas iniciar sesión o crear una cuenta.</p>
             <div className="flex justify-end space-x-4">
-              <button 
-                onClick={() => setShowLoginModal(false)} 
+              <button
+                onClick={() => setShowLoginModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
               >
                 Cancelar
               </button>
-              <button 
-                onClick={redirectToLogin} 
+              <button
+                onClick={redirectToLogin}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 Iniciar sesión
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal del mapa */}
+      {showMap && selectedApartment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 relative w-full max-w-2xl h-[500px] flex flex-col">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 text-2xl"
+              onClick={() => setShowMap(false)}
+            >
+              ×
+            </button>
+            <h2 className="text-xl font-bold mb-4 text-blue-600">Ubicación en el mapa</h2>
+            <div id="map" className="w-full h-full rounded-lg" style={{ minHeight: 400 }}></div>
           </div>
         </div>
       )}
@@ -410,6 +523,37 @@ const App = () => {
           <li><Link to="/contacto" className="hover:text-yellow-300">Contacto</Link></li>
         </ul>
       </footer>
+
+      {/* Animaciones y gradientes personalizados */}
+      <style jsx>{`
+        .animate-glow-gold {
+          box-shadow: 0 0 16px 4px #ffd70099, 0 0 4px 2px #ffd70066;
+          animation: goldGlow 1.5s infinite alternate;
+        }
+        @keyframes goldGlow {
+          from { box-shadow: 0 0 8px 2px #ffd70066; }
+          to { box-shadow: 0 0 24px 8px #ffd700cc; }
+        }
+        .border-gradient-gold-red {
+          border-image: linear-gradient(90deg, #ffd700 0%, #ff0000 100%);
+          border-image-slice: 1;
+        }
+        .animate-glow-gold-red {
+          box-shadow: 0 0 16px 4px #ffd70099, 0 0 8px 2px #ff000099;
+          animation: goldRedGlow 1.5s infinite alternate;
+        }
+        @keyframes goldRedGlow {
+          from { box-shadow: 0 0 8px 2px #ffd70066, 0 0 4px 2px #ff000066; }
+          to { box-shadow: 0 0 24px 8px #ffd700cc, 0 0 12px 4px #ff0000cc; }
+        }
+        .animate-pulse {
+          animation: pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1);
+        }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.05); }
+        }
+      `}</style>
     </div>
   );
 };

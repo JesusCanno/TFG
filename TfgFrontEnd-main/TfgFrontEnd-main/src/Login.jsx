@@ -10,7 +10,6 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [redirecting, setRedirecting] = useState(false);
-  const [debugInfo, setDebugInfo] = useState("");
 
   // Verificar si ya hay sesión activa al cargar
   useEffect(() => {
@@ -34,7 +33,6 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-    setDebugInfo("");
     
     if (!email || !password) {
       setErrorMessage("Por favor, introduce tu email y contraseña");
@@ -45,19 +43,12 @@ const Login = () => {
       setRedirecting(true);
       console.log('Enviando solicitud de login...');
       
-      // Mostrar los datos que se envían al servidor
-      setDebugInfo(`Enviando login con: ${email}, ${password.substring(0, 1)}${'*'.repeat(password.length - 1)}`);
-      
       const response = await authService.login(email, password);
       console.log("Login exitoso:", response);
-      setDebugInfo(prev => `${prev}\nRespuesta recibida: ${JSON.stringify(response)}`);
       
       // Verificar que se guardó el token
       const token = localStorage.getItem('token');
       const user = localStorage.getItem('user');
-      
-      setDebugInfo(prev => `${prev}\nToken guardado: ${token ? 'Sí' : 'No'}`);
-      setDebugInfo(prev => `${prev}\nUsuario guardado: ${user ? 'Sí' : 'No'}`);
       
       if (!token) {
         throw new Error("No se pudo guardar el token");
@@ -67,15 +58,11 @@ const Login = () => {
       const userObj = JSON.parse(user || '{}');
       const role = userObj?.rol;
       
-      setDebugInfo(prev => `${prev}\nRol del usuario: ${role || 'No encontrado'}`);
-      
       // Esperar un poco para asegurar que localStorage se actualice
       setTimeout(() => {
         if (role === 'negocio') {
-          setDebugInfo(prev => `${prev}\nRedirigiendo a: /business-dashboard`);
           window.location.replace('/business-dashboard');
         } else {
-          setDebugInfo(prev => `${prev}\nRedirigiendo a: /account`);
           window.location.replace('/account');
         }
       }, 1500);
@@ -83,7 +70,6 @@ const Login = () => {
       setRedirecting(false);
       console.error("Error login:", error);
       setErrorMessage(error.response?.data?.message || error.message || 'Error al iniciar sesión');
-      setDebugInfo(`Error: ${JSON.stringify(error.response?.data || error.message)}`);
     }
   };
 
@@ -187,12 +173,6 @@ const Login = () => {
           {redirecting && (
             <div className="mt-4 text-center">
               <p className="text-blue-600">Iniciando sesión, por favor espera...</p>
-            </div>
-          )}
-          
-          {debugInfo && (
-            <div className="mt-4 p-3 bg-gray-100 rounded text-xs font-mono">
-              <pre className="whitespace-pre-wrap">{debugInfo}</pre>
             </div>
           )}
           

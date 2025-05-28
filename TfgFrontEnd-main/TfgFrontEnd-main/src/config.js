@@ -16,8 +16,9 @@ export const APP_VERSION = '1.0.0';
 export const ENV = 'development';
 
 // Función para construir URLs completas para imágenes
-export const getImageUrl = (path) => {
-  if (!path) return '/placeholder-house.jpg';
-  if (path.startsWith('http')) return path;
-  return `${BACKEND_URL}${path}`;
-}; 
+export function getImageUrl(path) {
+    if (!path) return '/sinFondo.png'; // Imagen por defecto
+    if (path.startsWith('http')) return path;
+    // Siempre usa la URL base de php artisan serve
+    return `http://127.0.0.1:8000${path}`;
+}

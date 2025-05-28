@@ -4,6 +4,7 @@ import { navigateToHome } from "./general";
 import authService from './services/authService';
 import propertyService from './services/propertyService';
 import adminService from './services/adminService';
+import { businessService } from './services';
 
 const Account = () => {
   const [userData, setUserData] = useState(null);
@@ -29,10 +30,6 @@ const Account = () => {
   const handleLogout = async () => {
     await authService.logout();
     navigate('/');
-  };
-
-  const navigateToFavorites = () => {
-    navigate('/favorites');
   };
 
   return (
@@ -62,7 +59,14 @@ const Account = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'negocio' && authService.getUserRole() !== 'admin' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
+          {authService.getUserRole() === 'negocio' && (
+            <Link to="/business-dashboard" className="text-gray-600 hover:text-blue-600 font-medium">
+              Panel de negocio
+            </Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -76,7 +80,7 @@ const Account = () => {
                 <h1 className="text-2xl font-bold">Mi Cuenta</h1>
                 <p className="mt-1">Gestiona tu información personal y preferencias</p>
               </div>
-              
+
               <div className="p-6">
                 <div className="flex flex-col md:flex-row">
                   {/* Menú lateral */}
@@ -84,42 +88,38 @@ const Account = () => {
                     <nav>
                       <ul className="space-y-2">
                         <li className={activeSection === "personal" ? "bg-blue-50 rounded-md" : ""}>
-                          <button 
+                          <button
                             className={`w-full text-left px-4 py-2 ${activeSection === "personal" ? "text-blue-600 font-medium" : "text-gray-700 hover:bg-gray-100 rounded-md"}`}
                             onClick={() => setActiveSection("personal")}
                           >
                             Información personal
                           </button>
                         </li>
-                        {(userRole === 'negocio' || userRole === 'admin') && (
-                          <li className={activeSection === "properties" ? "bg-blue-50 rounded-md" : ""}>
-                            <button 
-                              className={`w-full text-left px-4 py-2 ${activeSection === "properties" ? "text-blue-600 font-medium" : "text-gray-700 hover:bg-gray-100 rounded-md"}`}
-                              onClick={() => setActiveSection("properties")}
+                        {userRole === 'negocio' && (
+                          <li>
+                            <Link to="/business-dashboard" className="w-full block text-left px-4 py-2 text-yellow-700 hover:bg-yellow-100 rounded-md font-semibold">
+                              Panel de negocio
+                            </Link>
+                          </li>
+                        )}
+                        {userRole === 'cliente' && (
+                          <li>
+                            <button
+                              className={`w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md`}
+                              onClick={() => navigate('/favorites')}
                             >
-                              Mis propiedades
+                              Favoritos
                             </button>
                           </li>
                         )}
-                        <li>
-                          <button 
-                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md"
-                            onClick={navigateToFavorites}
-                          >
-                            Favoritos
-                          </button>
-                        </li>
-                        <li className={activeSection === "alerts" ? "bg-blue-50 rounded-md" : ""}>
-                          <button 
-                            className={`w-full text-left px-4 py-2 ${activeSection === "alerts" ? "text-blue-600 font-medium" : "text-gray-700 hover:bg-gray-100 rounded-md"}`}
-                            onClick={() => setActiveSection("alerts")}
-                          >
-                            Alertas
-                          </button>
-                        </li>
                         {userRole === 'admin' && (
                           <li>
-                            <button className="w-full text-left px-4 py-2 text-purple-600 hover:bg-purple-50 rounded-md" onClick={() => setActiveSection("admin")}>Panel de administración</button>
+                            <button
+                              className={`w-full text-left px-4 py-2 text-purple-700 hover:bg-purple-100 rounded-md font-semibold`}
+                              onClick={() => navigate('/admin-dashboard')}
+                            >
+                              Panel de administración
+                            </button>
                           </li>
                         )}
                         <li>
@@ -130,7 +130,7 @@ const Account = () => {
                       </ul>
                     </nav>
                   </div>
-                  
+
                   {/* Contenido principal */}
                   <div className="md:w-3/4 md:pl-8">
                     {activeSection === "personal" && (
@@ -153,52 +153,19 @@ const Account = () => {
                       </div>
                     )}
 
-                    {activeSection === "properties" && (userRole === 'negocio' || userRole === 'admin') && (
+                    {activeSection === "favorites" && userRole === 'cliente' && (
                       <div>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-6">Mis propiedades</h2>
-                        {myProperties.length === 0 ? (
-                          <p className="text-gray-600">No tienes propiedades publicadas actualmente.</p>
-                        ) : (
-                          <ul className="space-y-4">
-                            {myProperties.map((prop) => (
-                              <li key={prop.id} className="bg-gray-50 p-4 rounded shadow flex flex-col md:flex-row md:items-center justify-between">
-                                <div>
-                                  <Link to={`/inmueble/${prop.id}`} className="text-blue-600 hover:underline font-semibold">{prop.nombre}</Link>
-                                  <div className="text-gray-600 text-sm">{prop.ubicacion}</div>
-                                </div>
-                                <div className="flex space-x-4 mt-2 md:mt-0">
-                                  <span>Precio: <b>{prop.precio} €</b></span>
-                                  <span>Metros: <b>{prop.area} m²</b></span>
-                                  <span>Habitaciones: <b>{prop.habitaciones}</b></span>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <Link to="/vende-tu-piso" className="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                          Publicar una propiedad
+                        <h2 className="text-xl font-semibold text-gray-800 mb-6">Mis favoritos</h2>
+                        <p className="text-gray-600">Aquí aparecerán las propiedades que marques como favoritas.</p>
+                        <Link to="/favorites" className="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                          Ver favoritos
                         </Link>
                       </div>
                     )}
 
-                    {activeSection === "alerts" && (
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-800 mb-6">Mis alertas</h2>
-                        <p className="text-gray-600">No tienes alertas configuradas actualmente.</p>
-                        <button className="inline-block mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                          Crear nueva alerta
-                        </button>
-                      </div>
-                    )}
+                    {activeSection === "businessRequests" && userRole === 'admin' && <AdminBusinessRequests />}
 
-                    {activeSection === "admin" && userRole === 'admin' && (
-                      <div>
-                        <h2 className="text-xl font-semibold text-purple-800 mb-6">Panel de administración</h2>
-                        <p className="text-gray-600 mb-4">Gestiona los usuarios de la plataforma.</p>
-                        {/* Gestión de usuarios */}
-                        <AdminUserPanel />
-                      </div>
-                    )}
+                    {activeSection === 'admin' && userRole === 'admin' && <AdminUserPanel />}
                   </div>
                 </div>
               </div>
@@ -289,42 +256,37 @@ function AdminUserPanel() {
   };
 
   return (
-    <div>
-      <div className="flex justify-between mb-4">
-        <h3 className="text-lg font-semibold">Usuarios</h3>
-        <button onClick={handleCreate} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Crear usuario</button>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-xl font-bold text-blue-700">Usuarios registrados</h3>
+        <button onClick={handleCreate} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">+ Crear usuario</button>
       </div>
       {loading ? (
         <p>Cargando usuarios...</p>
       ) : error ? (
         <p className="text-red-600">{error}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Nombre</th>
-                <th className="px-4 py-2">Email</th>
-                <th className="px-4 py-2">Rol</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user.id} className="bg-white border-b">
-                  <td className="px-4 py-2">{user.id}</td>
-                  <td className="px-4 py-2">{user.name}</td>
-                  <td className="px-4 py-2">{user.email}</td>
-                  <td className="px-4 py-2">{user.rol}</td>
-                  <td className="px-4 py-2 space-x-2">
-                    <button onClick={() => handleEdit(user)} className="text-blue-600 hover:underline">Editar</button>
-                    <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:underline">Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {users.map(user => (
+            <div key={user.id} className="bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-5 flex flex-col justify-between">
+              <div className="flex items-center mb-2">
+                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="ml-4">
+                  <div className="font-semibold text-gray-800 text-lg">{user.name}</div>
+                  <div className="text-gray-500 text-sm">{user.email}</div>
+                </div>
+              </div>
+              <div className="flex items-center mb-2">
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.rol === 'admin' ? 'bg-purple-100 text-purple-700' : user.rol === 'negocio' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>{user.rol.charAt(0).toUpperCase() + user.rol.slice(1)}</span>
+              </div>
+              <div className="flex space-x-2 mt-2">
+                <button onClick={() => handleEdit(user)} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">Editar</button>
+                <button onClick={() => handleDelete(user.id)} className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">Eliminar</button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
       {/* Modal de crear/editar usuario */}
@@ -366,4 +328,92 @@ function AdminUserPanel() {
   );
 }
 
-export default Account; 
+function AdminBusinessRequests() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionMsg, setActionMsg] = useState("");
+
+  const fetchRequests = () => {
+    setLoading(true);
+    businessService.getAllBusinessRequests()
+      .then(data => {
+        setRequests(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Error al cargar las solicitudes');
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const handleApprove = async (id) => {
+    try {
+      await businessService.approveBusinessRequest(id);
+      setActionMsg('Solicitud aprobada y usuario creado.');
+      fetchRequests();
+    } catch {
+      setActionMsg('Error al aprobar la solicitud.');
+    }
+    setTimeout(() => setActionMsg(''), 4000);
+  };
+
+  const handleReject = async (id) => {
+    try {
+      await businessService.rejectBusinessRequest(id);
+      setActionMsg('Solicitud rechazada y eliminada.');
+      fetchRequests();
+    } catch {
+      setActionMsg('Error al rechazar la solicitud.');
+    }
+    setTimeout(() => setActionMsg(''), 4000);
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-6">Solicitudes de cuentas empresariales</h2>
+      {actionMsg && <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded">{actionMsg}</div>}
+      {loading ? (
+        <p>Cargando solicitudes...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : requests.length === 0 ? (
+        <p className="text-gray-600">No hay solicitudes pendientes.</p>
+      ) : (
+        <div className="space-y-6">
+          {requests.map(req => (
+            <div key={req.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <span className="font-bold text-blue-700 text-lg">{req.company_name}</span>
+                  <span className="ml-4 text-gray-500">{new Date(req.created_at).toLocaleString()}</span>
+                </div>
+                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-semibold">Pendiente</span>
+              </div>
+              <div className="mb-2"><b>Persona de contacto:</b> {req.contact_person}</div>
+              <div className="mb-2"><b>Email:</b> {req.email}</div>
+              {req.phone && <div className="mb-2"><b>Teléfono:</b> {req.phone}</div>}
+              {req.business_type && <div className="mb-2"><b>Tipo de negocio:</b> {req.business_type}</div>}
+              {req.employees && <div className="mb-2"><b>Empleados:</b> {req.employees}</div>}
+              {req.description && <div className="mb-2"><b>Descripción:</b> {req.description}</div>}
+              {req.services && (
+                <div className="mb-2"><b>Servicios:</b> {JSON.parse(req.services).join(', ')}</div>
+              )}
+              <div className="flex space-x-4 mt-4">
+                <button onClick={() => handleApprove(req.id)} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Aprobar</button>
+                <button onClick={() => handleReject(req.id)} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">Rechazar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Account;
+export { AdminUserPanel, AdminBusinessRequests };

@@ -33,7 +33,7 @@ class controladorInmueble extends Controller
             'tipo'=> 'required|in:piso,casa,local,terreno', //tipos de inmuebles
             'operacion' => 'required|in:venta,alquiler', // tipo de operación
             'titulo' => 'required|string|max:255',
-            'foto'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para imágenes
+            'foto'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Validación para imágenes (5MB)
             'direccion'=> 'required|unique:inmueble', //para que no haya dos inmuebles iguales
             'precio'=> 'required|numeric|min:0',
             'habitacion'=> 'required|integer|min:0',
@@ -157,7 +157,7 @@ class controladorInmueble extends Controller
             'tipo'=> 'required|in:piso,casa,local,terreno', //tipos de inmuebles
             'operacion' => 'required|in:venta,alquiler',
             'titulo' => 'required|string|max:255',
-            'foto'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para imágenes
+            'foto'=> 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Validación para imágenes (5MB)
             'direccion'=> 'required|unique:inmueble,direccion,'.$id, // Excluye el inmueble actual
             'precio'=> 'required|numeric|min:0',
             'habitacion'=> 'required|integer|min:0',
@@ -224,7 +224,7 @@ class controladorInmueble extends Controller
 
         $validator = Validator::make($request->all(), [
             'tipo'=> 'sometimes|in:piso,casa', //solo acepta pisos o casas
-            'foto'=> 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validación para imágenes
+            'foto'=> 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // Validación para imágenes (5MB)
             'direccion'=> 'sometimes|unique:inmueble,direccion,'.$id, // Excluye el inmueble actual
             'precio'=> 'sometimes|numeric|min:0',
             'habitacion'=> 'sometimes|integer|min:0',

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import { businessService } from './services';
+import authService from "./services/authService";
 
 const Business = () => {
   const [formData, setFormData] = useState({
@@ -39,15 +41,24 @@ const Business = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mostrar mensaje de confirmación
-    setMessage("Formulario enviado correctamente. Nos pondremos en contacto contigo pronto.");
-    
-    // En una aplicación real, aquí se enviaría la información a un backend
-    console.log("Datos del formulario:", formData);
-    
-    // Limpiar formulario después de 3 segundos
+    try {
+      await businessService.sendBusinessRequest(formData);
+      setMessage("Formulario enviado correctamente. Nos pondremos en contacto contigo pronto.");
+      setFormData({
+        companyName: "",
+        contactPerson: "",
+        email: "",
+        phone: "",
+        businessType: "",
+        employees: "",
+        description: "",
+        services: []
+      });
+    } catch (error) {
+      setMessage("Hubo un error al enviar la solicitud. Inténtalo de nuevo más tarde.");
+    }
     setTimeout(() => {
       setMessage("");
     }, 5000);
@@ -80,7 +91,9 @@ const Business = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-blue-600 font-medium">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && (
+            <Link to="/business" className="text-blue-600 font-medium">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -99,7 +112,7 @@ const Business = () => {
         <section className="py-16 bg-white">
           <div className="max-w-6xl mx-auto px-6">
             <h2 className="text-3xl font-bold mb-12 text-center text-gray-800">¿Por qué elegir Vivius Business?</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                 <div className="bg-blue-100 p-4 rounded-full inline-block mb-4">
@@ -170,13 +183,13 @@ const Business = () => {
           <div className="max-w-3xl mx-auto px-6">
             <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Solicita tu cuenta empresarial</h2>
             <p className="text-gray-600 text-center mb-10">Completa el siguiente formulario y nuestro equipo evaluará tu solicitud. Te contactaremos en un plazo máximo de 48 horas hábiles.</p>
-            
+
             {message && (
               <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
                 <p className="text-green-700">{message}</p>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
               <div className="mb-6">
                 <label htmlFor="companyName" className="block text-gray-700 font-medium mb-2">Nombre de la empresa*</label>
@@ -190,7 +203,7 @@ const Business = () => {
                   required
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label htmlFor="contactPerson" className="block text-gray-700 font-medium mb-2">Persona de contacto*</label>
@@ -217,7 +230,7 @@ const Business = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label htmlFor="phone" className="block text-gray-700 font-medium mb-2">Teléfono*</label>
@@ -250,7 +263,7 @@ const Business = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <label htmlFor="employees" className="block text-gray-700 font-medium mb-2">Número de empleados</label>
                 <select
@@ -268,7 +281,7 @@ const Business = () => {
                   <option value="50+">Más de 50 empleados</option>
                 </select>
               </div>
-              
+
               <div className="mb-6">
                 <label htmlFor="description" className="block text-gray-700 font-medium mb-2">Breve descripción de tu empresa</label>
                 <textarea
@@ -280,7 +293,7 @@ const Business = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
                 ></textarea>
               </div>
-              
+
               <div className="mb-6">
                 <p className="block text-gray-700 font-medium mb-2">Servicios que ofreces</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -295,7 +308,7 @@ const Business = () => {
                     />
                     <label htmlFor="compraventa" className="ml-2 block text-sm text-gray-700">Compraventa de inmuebles</label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -307,7 +320,7 @@ const Business = () => {
                     />
                     <label htmlFor="alquiler" className="ml-2 block text-sm text-gray-700">Alquiler de propiedades</label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -319,7 +332,7 @@ const Business = () => {
                     />
                     <label htmlFor="tasacion" className="ml-2 block text-sm text-gray-700">Tasación de inmuebles</label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -331,7 +344,7 @@ const Business = () => {
                     />
                     <label htmlFor="reforma" className="ml-2 block text-sm text-gray-700">Reformas y construcción</label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -343,7 +356,7 @@ const Business = () => {
                     />
                     <label htmlFor="gestion" className="ml-2 block text-sm text-gray-700">Gestión de propiedades</label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -357,7 +370,7 @@ const Business = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center mb-6">
                 <input
                   type="checkbox"
@@ -369,7 +382,7 @@ const Business = () => {
                   He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link>
                 </label>
               </div>
-              
+
               <button
                 type="submit"
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -393,4 +406,4 @@ const Business = () => {
   );
 };
 
-export default Business; 
+export default Business;

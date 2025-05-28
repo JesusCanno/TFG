@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const ValoraTuCasa = () => {
   // Estado para el formulario
@@ -17,17 +18,17 @@ const ValoraTuCasa = () => {
     telefono: "",
     email: ""
   });
-  
+
   // Estado para mostrar mensaje de éxito
   const [enviado, setEnviado] = useState(false);
-  
+
   // Estado para la etapa actual del formulario (1: datos propiedad, 2: datos contacto)
   const [etapa, setEtapa] = useState(1);
 
   // Manejar cambios en los inputs
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     if (type === 'checkbox') {
       // Para manejar múltiples checkboxes
       if (checked) {
@@ -55,7 +56,7 @@ const ValoraTuCasa = () => {
     setEtapa(2);
     window.scrollTo(0, 0);
   };
-  
+
   // Etapa anterior
   const irEtapaAnterior = () => {
     setEtapa(1);
@@ -67,11 +68,11 @@ const ValoraTuCasa = () => {
     e.preventDefault();
     // Aquí iría la lógica para enviar el formulario a un backend
     console.log("Valoración solicitada:", formData);
-    
+
     // Simulamos el envío exitoso
     setEnviado(true);
     window.scrollTo(0, 0);
-    
+
     // Resetear el formulario después de 5 segundos
     setTimeout(() => {
       setFormData({
@@ -119,7 +120,9 @@ const ValoraTuCasa = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -132,7 +135,7 @@ const ValoraTuCasa = () => {
             Obtén una valoración gratuita de tu propiedad en menos de 5 minutos. Nuestro algoritmo avanzado utiliza datos del mercado inmobiliario actual para darte una estimación precisa.
           </p>
         </div>
-        
+
         {enviado ? (
           <div className="bg-white shadow-lg rounded-lg p-8 mb-8 text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -164,12 +167,12 @@ const ValoraTuCasa = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-8">
               {etapa === 1 ? (
                 <form onSubmit={irSiguienteEtapa}>
                   <h2 className="text-xl font-semibold text-gray-800 mb-6">Datos de tu propiedad</h2>
-                  
+
                   <div className="mb-4">
                     <label htmlFor="direccion" className="block text-gray-700 font-medium mb-2">Dirección completa *</label>
                     <input
@@ -183,7 +186,7 @@ const ValoraTuCasa = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                       <label htmlFor="tipo" className="block text-gray-700 font-medium mb-2">Tipo de inmueble *</label>
@@ -240,7 +243,7 @@ const ValoraTuCasa = () => {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                       <label htmlFor="habitaciones" className="block text-gray-700 font-medium mb-2">Habitaciones *</label>
@@ -296,7 +299,7 @@ const ValoraTuCasa = () => {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-2">Características adicionales</label>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -374,7 +377,7 @@ const ValoraTuCasa = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="text-right">
                     <button
                       type="submit"
@@ -387,7 +390,7 @@ const ValoraTuCasa = () => {
               ) : (
                 <form onSubmit={handleSubmit}>
                   <h2 className="text-xl font-semibold text-gray-800 mb-6">Tus datos de contacto</h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div>
                       <label htmlFor="nombre" className="block text-gray-700 font-medium mb-2">Nombre completo *</label>
@@ -414,7 +417,7 @@ const ValoraTuCasa = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="mb-6">
                     <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email *</label>
                     <input
@@ -427,7 +430,7 @@ const ValoraTuCasa = () => {
                       required
                     />
                   </div>
-                  
+
                   <div className="flex items-center mb-6">
                     <input
                       type="checkbox"
@@ -439,7 +442,7 @@ const ValoraTuCasa = () => {
                       He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link>
                     </label>
                   </div>
-                  
+
                   <div className="flex justify-between">
                     <button
                       type="button"
@@ -448,7 +451,7 @@ const ValoraTuCasa = () => {
                     >
                       Anterior
                     </button>
-                    
+
                     <button
                       type="submit"
                       className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -461,7 +464,7 @@ const ValoraTuCasa = () => {
             </div>
           </div>
         )}
-        
+
         {/* Información adicional */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -473,7 +476,7 @@ const ValoraTuCasa = () => {
             <h3 className="text-lg font-semibold mb-2">Valoración precisa</h3>
             <p className="text-gray-600">Utilizamos algoritmos avanzados y datos del mercado actual para ofrecerte la valoración más precisa posible.</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -483,7 +486,7 @@ const ValoraTuCasa = () => {
             <h3 className="text-lg font-semibold mb-2">Respuesta rápida</h3>
             <p className="text-gray-600">Te enviaremos la valoración de tu propiedad en un plazo máximo de 24 horas.</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -508,4 +511,4 @@ const ValoraTuCasa = () => {
   );
 };
 
-export default ValoraTuCasa; 
+export default ValoraTuCasa;

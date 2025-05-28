@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const AlquilerVacacional = () => {
   return (
@@ -30,7 +31,9 @@ const AlquilerVacacional = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -39,27 +42,27 @@ const AlquilerVacacional = () => {
       <main className="max-w-4xl mx-auto p-8 mt-16 mb-16">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="bg-blue-600 p-8 text-center">
-            <img 
-              src="/sinFondo.png" 
-              alt="Logo Vivius" 
-              className="w-32 h-auto mx-auto mb-6" 
+            <img
+              src="/sinFondo.png"
+              alt="Logo Vivius"
+              className="w-32 h-auto mx-auto mb-6"
             />
             <h1 className="text-3xl font-bold text-white">Alquiler Vacacional</h1>
           </div>
-          
+
           <div className="p-8 text-center">
             <div className="w-24 h-24 mx-auto mb-6 bg-yellow-100 rounded-full flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-gray-800 mb-4">¡Próximamente!</h2>
-            
+
             <p className="text-gray-600 text-lg mb-6 max-w-xl mx-auto">
               Estamos trabajando en nuestra plataforma de alquiler vacacional para ofrecerte las mejores opciones para tus vacaciones.
             </p>
-            
+
             <div className="p-6 bg-blue-50 rounded-lg mb-8 max-w-lg mx-auto">
               <h3 className="text-lg font-semibold text-blue-600 mb-2">¿Qué podrás encontrar?</h3>
               <ul className="text-left text-gray-700 space-y-2">
@@ -89,20 +92,20 @@ const AlquilerVacacional = () => {
                 </li>
               </ul>
             </div>
-            
+
             <p className="text-gray-600 mb-8">
               ¿Tienes una propiedad para alquiler vacacional? Regístrate y deja tus datos para ser de los primeros en unirte a nuestra plataforma.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="bg-blue-600 text-white font-medium py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200"
               >
                 Volver a inicio
               </Link>
-              <Link 
-                to="/contacto" 
+              <Link
+                to="/contacto"
                 className="bg-white border border-blue-600 text-blue-600 font-medium py-3 px-6 rounded-lg hover:bg-blue-50 transition duration-200"
               >
                 Contactar con nosotros
@@ -124,4 +127,4 @@ const AlquilerVacacional = () => {
   );
 };
 
-export default AlquilerVacacional; 
+export default AlquilerVacacional;

@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const Legal = () => {
   return (
@@ -30,7 +31,9 @@ const Legal = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -62,14 +65,14 @@ const Legal = () => {
             <li>Teléfono: 910 123 456</li>
           </ul>
         </section>
-        
+
         {/* Términos de uso */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">2. Términos y Condiciones de Uso</h2>
           <p className="text-gray-700 mb-4">
             El acceso y uso de este sitio web está sujeto a los presentes términos y condiciones de uso y todas las leyes y regulaciones aplicables. El acceso a este sitio web y su uso implica la aceptación de estos términos y condiciones sin reservas.
           </p>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">2.1. Uso del sitio</h3>
           <p className="text-gray-700 mb-4">
             Vivius Inmobiliaria autoriza la visualización, impresión y descarga parcial del contenido de este sitio web, única y exclusivamente si concurren las siguientes condiciones:
@@ -80,7 +83,7 @@ const Legal = () => {
             <li>Que ninguno de los contenidos del sitio web sean modificados de manera alguna.</li>
             <li>Que ningún gráfico, icono o imagen disponible en este sitio web sea utilizado, copiado o distribuido separadamente del texto o resto de imágenes que lo acompañan.</li>
           </ul>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">2.2. Contenido y disponibilidad</h3>
           <p className="text-gray-700 mb-4">
             Vivius Inmobiliaria no garantiza que los contenidos del sitio web sean precisos, completos o actualizados. La información de las propiedades inmobiliarias es orientativa y no constituye una oferta vinculante. Los precios, características y disponibilidad de los inmuebles pueden variar sin previo aviso.
@@ -89,7 +92,7 @@ const Legal = () => {
             Vivius Inmobiliaria se reserva el derecho a realizar cambios en el sitio web, en sus políticas y en sus condiciones de servicio en cualquier momento y sin previo aviso.
           </p>
         </section>
-        
+
         {/* Propiedad intelectual */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">3. Propiedad Intelectual e Industrial</h2>
@@ -100,16 +103,16 @@ const Legal = () => {
             Las marcas, nombres comerciales o signos distintivos son titularidad de Vivius Inmobiliaria o terceros, sin que pueda entenderse que el acceso al sitio web atribuya algún derecho sobre las citadas marcas, nombres comerciales y/o signos distintivos.
           </p>
         </section>
-        
+
         {/* Política de privacidad */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">4. Política de Privacidad</h2>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">4.1. Responsable del tratamiento</h3>
           <p className="text-gray-700 mb-4">
             El responsable del tratamiento de sus datos personales es Vivius Inmobiliaria, S.L., con CIF B12345678 y domicilio social en Calle Ejemplo, 123, 28001 Madrid.
           </p>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">4.2. Finalidad del tratamiento</h3>
           <p className="text-gray-700 mb-4">
             Tratamos la información que nos facilitan las personas interesadas con las siguientes finalidades:
@@ -121,7 +124,7 @@ const Legal = () => {
             <li>Elaborar perfiles con fines comerciales para ofrecer propiedades que puedan ser de interés para el usuario, siempre que este haya dado su consentimiento.</li>
             <li>Cumplir con obligaciones legales aplicables a nuestra actividad.</li>
           </ul>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">4.3. Legitimación del tratamiento</h3>
           <p className="text-gray-700 mb-4">
             La base legal para el tratamiento de sus datos es:
@@ -132,7 +135,7 @@ const Legal = () => {
             <li>El interés legítimo de Vivius Inmobiliaria para atender las solicitudes y mejorar nuestros servicios.</li>
             <li>El cumplimiento de obligaciones legales aplicables.</li>
           </ul>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">4.4. Derechos de los interesados</h3>
           <p className="text-gray-700 mb-4">
             Cualquier persona tiene derecho a obtener confirmación sobre si estamos tratando datos personales que les conciernan. Las personas interesadas tienen derecho a acceder a sus datos personales, así como a solicitar la rectificación de los datos inexactos o, en su caso, solicitar su supresión cuando, entre otros motivos, los datos ya no sean necesarios para los fines que fueron recogidos.
@@ -144,7 +147,7 @@ const Legal = () => {
             Para ejercer estos derechos, puede dirigirse a nosotros a través del correo electrónico: privacidad@vivius.es o por correo postal a la dirección indicada, adjuntando copia de su DNI o documento identificativo equivalente.
           </p>
         </section>
-        
+
         {/* Política de cookies */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">5. Política de Cookies</h2>
@@ -154,7 +157,7 @@ const Legal = () => {
           <p className="text-gray-700 mb-4">
             Las cookies son archivos que se pueden descargar en su equipo a través de las páginas web. Son herramientas que tienen un papel esencial para la prestación de numerosos servicios de la sociedad de la información. Entre otros, permiten a una página web almacenar y recuperar información sobre los hábitos de navegación de un usuario o de su equipo y, dependiendo de la información obtenida, se pueden utilizar para reconocer al usuario y mejorar el servicio ofrecido.
           </p>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">5.1. Tipos de cookies utilizadas</h3>
           <p className="text-gray-700 mb-4">
             Este sitio web utiliza los siguientes tipos de cookies:
@@ -165,7 +168,7 @@ const Legal = () => {
             <li><strong>Cookies de personalización:</strong> Son aquellas que permiten al usuario acceder al servicio con algunas características de carácter general predefinidas en función de una serie de criterios en el terminal del usuario como por ejemplo serían el idioma, el tipo de navegador, etc.</li>
             <li><strong>Cookies publicitarias:</strong> Son aquellas que permiten la gestión, de la forma más eficaz posible, de los espacios publicitarios que, en su caso, el editor haya incluido en una página web, aplicación o plataforma desde la que presta el servicio solicitado en base a criterios como el contenido editado o la frecuencia en la que se muestran los anuncios.</li>
           </ul>
-          
+
           <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3">5.2. Cómo deshabilitar las cookies</h3>
           <p className="text-gray-700 mb-4">
             Puede usted permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su ordenador.
@@ -180,7 +183,7 @@ const Legal = () => {
             <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" className="text-blue-600 hover:underline">Safari</a></li>
           </ul>
         </section>
-        
+
         {/* Enlaces */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">6. Enlaces a Terceros</h2>
@@ -188,7 +191,7 @@ const Legal = () => {
             Este sitio web puede incluir enlaces a sitios web de terceros. Vivius Inmobiliaria no asume ninguna responsabilidad respecto a la información contenida en sitios web de terceros y las políticas de privacidad que en ellos se apliquen. Por esta razón, recomendamos a los usuarios que consulten las políticas de privacidad y los avisos legales de todos los sitios web a los que accedan a través de enlaces desde nuestro sitio web.
           </p>
         </section>
-        
+
         {/* Modificaciones */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">7. Modificación del Aviso Legal</h2>
@@ -196,7 +199,7 @@ const Legal = () => {
             Vivius Inmobiliaria se reserva el derecho a modificar el presente aviso legal para adaptarlo a novedades legislativas o jurisprudenciales, así como a prácticas de la industria. En dichos supuestos, anunciará en esta página los cambios introducidos con razonable antelación a su puesta en práctica.
           </p>
         </section>
-        
+
         {/* Legislación aplicable */}
         <section>
           <h2 className="text-2xl font-bold text-gray-800 mb-4 pb-2 border-b border-gray-200">8. Legislación Aplicable y Jurisdicción</h2>
@@ -221,4 +224,4 @@ const Legal = () => {
   );
 };
 
-export default Legal; 
+export default Legal;

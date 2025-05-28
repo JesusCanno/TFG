@@ -20,6 +20,7 @@ import BusinessDashboard from './BusinessDashboard.jsx'
 import PropertyDetail from './PropertyDetail'
 import CreateProperty from './CreateProperty.jsx'
 import EditProperty from './EditProperty.jsx'
+import AdminDashboard from './AdminDashboard'
 import './App.css'
 import authService from './services/authService'
 
@@ -60,12 +61,12 @@ const BusinessRoute = ({ children }) => {
     console.log('Acceso denegado: Usuario no autenticado');
     return <Navigate to="/login" replace />;
   }
-  
+
   if (!isBusinessUser()) {
     console.log('Acceso denegado: Usuario no es de tipo negocio');
     return <Navigate to="/" replace />;
   }
-  
+
   console.log('Acceso permitido: Usuario autenticado con rol de negocio');
   return children;
 };
@@ -104,54 +105,56 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/register" element={<Register />} />
         <Route path="/business" element={<Business />} />
         <Route path="/inmueble/:id" element={<PropertyDetail />} />
-        
+
         {/* Rutas protegidas */}
-        <Route 
-          path="/account" 
+        <Route
+          path="/account"
           element={
             <ProtectedRoute>
               <Account />
             </ProtectedRoute>
-          } 
+          }
         />
-        
-        <Route 
-          path="/favorites" 
+
+        <Route
+          path="/favorites"
           element={
             <ProtectedRoute>
               <Favorites />
             </ProtectedRoute>
-          } 
+          }
         />
-        
-        <Route 
-          path="/business-dashboard" 
+
+        <Route
+          path="/business-dashboard"
           element={
             <BusinessRoute>
               <BusinessDashboard />
             </BusinessRoute>
-          } 
+          }
         />
-        
+
         {/* Rutas para gestión de propiedades */}
-        <Route 
-          path="/crear-inmueble" 
+        <Route
+          path="/crear-inmueble"
           element={
             <BusinessRoute>
               <CreateProperty />
             </BusinessRoute>
-          } 
+          }
         />
-        
-        <Route 
-          path="/editar-inmueble/:id" 
+
+        <Route
+          path="/editar-inmueble/:id"
           element={
             <BusinessRoute>
               <EditProperty />
             </BusinessRoute>
-          } 
+          }
         />
-        
+
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
         {/* Ruta para página no encontrada */}
         <Route path="*" element={<NotFound />} />
       </Routes>

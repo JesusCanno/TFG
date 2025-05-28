@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import propertyService from './services/propertyService';
 import { getImageUrl } from './config';
 import authService from './services/authService';
+import { navigateToHome } from './general';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -11,6 +12,8 @@ const PropertyDetail = () => {
   const [error, setError] = useState(null);
   const [contact, setContact] = useState({ nombre: '', email: '', mensaje: '', telefono: '' });
   const [contactSuccess, setContactSuccess] = useState('');
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const maxDescriptionLength = 200;
 
   useEffect(() => {
     propertyService.getPropertyById(id)
@@ -58,37 +61,121 @@ const PropertyDetail = () => {
   if (!property) return null;
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <Link to="/" className="text-blue-600 hover:underline">&larr; Volver al listado</Link>
-      <div className="bg-white shadow-lg rounded-lg mt-4 p-6 flex flex-col md:flex-row">
-        <div className="md:w-1/2">
-          <img src={getImageUrl(property.foto)} alt={property.nombre} className="w-full rounded-lg" />
+    <div className="font-sans bg-gray-50 min-h-screen flex flex-col">
+      {/* Barra de presentación superior */}
+      <section className="bg-blue-600 text-white p-3">
+        <div className="max-w-7xl mx-auto flex justify-between">
+          <div>
+            <Link to="/vende-tu-piso" className="hover:underline">Vende tu piso</Link>
+            <Link to="/oficinas" className="ml-6 hover:underline">Oficinas</Link>
+            <Link to="/valoracion" className="ml-6 hover:underline">Valora tu casa</Link>
+            <Link to="/alquiler-vacacional" className="ml-6 hover:underline">Alquiler Vacacional</Link>
+          </div>
+          <div>
+            <Link to="/contacto" className="ml-6 hover:underline">Contacto</Link>
+            <Link to="/trabaja-con-nosotros" className="ml-6 hover:underline">Trabaja con nosotros</Link>
+            <Link to="/franquicia" className="ml-6 hover:underline">Abre tu franquicia</Link>
+          </div>
         </div>
-        <div className="md:w-1/2 md:pl-8 mt-6 md:mt-0">
-          <h1 className="text-2xl font-bold mb-2">{property.nombre}</h1>
-          <p className="text-gray-600 mb-2">{property.ubicacion}</p>
-          <div className="flex space-x-4 mb-4">
-            <span className="bg-gray-100 px-3 py-1 rounded">Precio: <b>{property.precio} €</b></span>
-            <span className="bg-gray-100 px-3 py-1 rounded">Metros: <b>{property.area} m²</b></span>
-            <span className="bg-gray-100 px-3 py-1 rounded">Habitaciones: <b>{property.habitaciones}</b></span>
-          </div>
-          <div className="mb-4">
-            <span className="font-semibold">Tipo:</span> {property.tipo}
-          </div>
-          <div className="mb-4">
-            <span className="font-semibold">Descripción:</span> {property.descripcion || 'Sin descripción.'}
-          </div>
-          <form onSubmit={handleContactSubmit} className="mt-6 bg-gray-50 p-4 rounded-lg shadow">
-            <h2 className="text-lg font-semibold mb-2">Contactar sobre este inmueble</h2>
-            {contactSuccess && <div className="mb-2 text-green-600">{contactSuccess}</div>}
-            <input type="text" name="nombre" value={contact.nombre} onChange={handleContactChange} placeholder="Tu nombre" className="w-full mb-2 p-2 border rounded" required />
-            <input type="email" name="email" value={contact.email} onChange={handleContactChange} placeholder="Tu email" className="w-full mb-2 p-2 border rounded" required />
-            <input type="tel" name="telefono" value={contact.telefono} onChange={handleContactChange} placeholder="Tu teléfono (opcional)" className="w-full mb-2 p-2 border rounded" />
-            <textarea name="mensaje" value={contact.mensaje} onChange={handleContactChange} placeholder="Mensaje" className="w-full mb-2 p-2 border rounded" required />
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Enviar mensaje</button>
-          </form>
+      </section>
+
+      {/* Cabecera */}
+      <header className="flex justify-between items-center p-5 bg-white shadow-md" style={{ height: '90px' }}>
+        <div className="flex items-center space-x-3 ml-6" onClick={navigateToHome}>
+          <Link to="/">
+            <img src="/sinFondo.png" alt="Logo" className="w-28 h-auto" />
+          </Link>
         </div>
-      </div>
+        <div className="flex space-x-6">
+          {authService.getUserRole && authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
+          <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
+        </div>
+      </header>
+
+      {/* Contenido principal */}
+      <main className="flex-1 max-w-5xl mx-auto p-6 my-10 w-full">
+        <Link to="/" className="text-blue-600 hover:underline flex items-center mb-4">&larr; Volver al listado</Link>
+        <div className="bg-white shadow-lg rounded-lg p-0 md:p-8 flex flex-col md:flex-row gap-0 md:gap-8">
+          {/* Imagen principal */}
+          <div className="md:w-1/2 flex flex-col gap-4">
+            <img src={getImageUrl(property.foto)} alt={property.titulo} className="w-full h-80 object-cover rounded-t-lg md:rounded-lg" />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {/* Aquí podrías mostrar más imágenes si las hubiera */}
+            </div>
+          </div>
+          {/* Info principal */}
+          <div className="md:w-1/2 flex flex-col justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-blue-600 mb-2">{property.titulo}</h1>
+              <p className="text-gray-600 mb-2 text-lg">{property.direccion}</p>
+              <div className="flex flex-wrap gap-3 mb-4">
+                <span className="bg-blue-50 text-blue-700 px-5 py-3 rounded-xl font-semibold text-lg shadow-sm">
+                  {property.precio} €
+                </span>
+                <span className="bg-blue-50 text-blue-700 px-5 py-3 rounded-xl font-semibold text-lg shadow-sm">
+                  {property.metro} m²
+                </span>
+                <span className="bg-blue-50 text-blue-700 px-5 py-3 rounded-xl font-semibold text-lg shadow-sm">
+                  {property.habitacion} hab.
+                </span>
+                <span className="bg-blue-50 text-blue-700 px-5 py-3 rounded-xl font-semibold text-lg shadow-sm capitalize">
+                  {property.tipo}
+                </span>
+              </div>
+              <div className="mb-4">
+                <span className="font-semibold text-gray-700">Descripción:</span>
+                <p className="text-gray-600 mt-1 whitespace-pre-line break-words">
+                  {property.descripcion && property.descripcion.length > maxDescriptionLength && !showFullDescription
+                    ? (
+                        <>
+                          {property.descripcion.slice(0, maxDescriptionLength)}...
+                          <button
+                            className="text-blue-600 ml-2 hover:underline text-sm"
+                            type="button"
+                            onClick={() => setShowFullDescription(true)}
+                          >
+                            Ver más
+                          </button>
+                        </>
+                      )
+                    : property.descripcion
+                  }
+                  {property.descripcion && property.descripcion.length > maxDescriptionLength && showFullDescription && (
+                    <button
+                      className="text-blue-600 ml-2 hover:underline text-sm"
+                      type="button"
+                      onClick={() => setShowFullDescription(false)}
+                    >
+                      Ver menos
+                    </button>
+                  )}
+                </p>
+              </div>
+            </div>
+            {/* Formulario de contacto */}
+            <form onSubmit={handleContactSubmit} className="mt-6 bg-gray-50 p-4 rounded-lg shadow">
+              <h2 className="text-lg font-semibold mb-2 text-blue-600">Contactar sobre este inmueble</h2>
+              {contactSuccess && <div className="mb-2 text-green-600">{contactSuccess}</div>}
+              <input type="text" name="nombre" value={contact.nombre} onChange={handleContactChange} placeholder="Tu nombre" className="w-full mb-2 p-2 border rounded" required />
+              <input type="email" name="email" value={contact.email} onChange={handleContactChange} placeholder="Tu email" className="w-full mb-2 p-2 border rounded" required />
+              <input type="tel" name="telefono" value={contact.telefono} onChange={handleContactChange} placeholder="Tu teléfono (opcional)" className="w-full mb-2 p-2 border rounded" />
+              <textarea name="mensaje" value={contact.mensaje} onChange={handleContactChange} placeholder="Mensaje" className="w-full mb-2 p-2 border rounded" required />
+              <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Enviar mensaje</button>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      {/* Pie de página */}
+      <footer className="bg-blue-600 text-white py-4 mt-auto">
+        <ul className="flex justify-center space-x-6">
+          <li><Link to="/legal" className="hover:text-yellow-300">Aviso Legal</Link></li>
+          <li><Link to="/about" className="hover:text-yellow-300">Conócenos</Link></li>
+          <li><Link to="/contacto" className="hover:text-yellow-300">Contacto</Link></li>
+        </ul>
+      </footer>
     </div>
   );
 };

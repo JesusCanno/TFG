@@ -169,7 +169,13 @@ const PropertyForm = ({ isEditing = false }) => {
       }
     } catch (err) {
       console.error('Error al guardar la propiedad:', err);
-      setError('Hubo un problema al guardar la propiedad. Por favor, revisa los datos e inténtalo de nuevo.');
+      // Si hay error de validación de imagen
+      if (err.response && err.response.data && err.response.data.errors && err.response.data.errors.foto) {
+        setFieldErrors(prev => ({ ...prev, foto: err.response.data.errors.foto[0] }));
+        setError('La imagen es demasiado grande o tiene un formato no permitido. Máximo 5MB.');
+      } else {
+        setError('Hubo un problema al guardar la propiedad. Por favor, revisa los datos e inténtalo de nuevo.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -206,13 +212,13 @@ const PropertyForm = ({ isEditing = false }) => {
         <h1 className="text-2xl font-bold mb-6">
           {isEditing ? 'Editar propiedad' : 'Crear nueva propiedad'}
         </h1>
-        
+
         {error && (
           <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
             <p className="text-red-700">{error}</p>
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
             <p className="text-green-700">
@@ -221,7 +227,7 @@ const PropertyForm = ({ isEditing = false }) => {
             <p className="text-sm text-green-600">Redirigiendo al panel de control...</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Información básica */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -240,7 +246,7 @@ const PropertyForm = ({ isEditing = false }) => {
               />
               {fieldErrors.titulo && <p className="text-red-600 text-sm mt-1">{fieldErrors.titulo}</p>}
             </div>
-            
+
             <div>
               <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">
                 Precio (€) *
@@ -258,7 +264,7 @@ const PropertyForm = ({ isEditing = false }) => {
               />
               {fieldErrors.precio && <p className="text-red-600 text-sm mt-1">{fieldErrors.precio}</p>}
             </div>
-            
+
             <div>
               <label htmlFor="metro" className="block text-sm font-medium text-gray-700 mb-1">
                 Metros cuadrados *
@@ -276,7 +282,7 @@ const PropertyForm = ({ isEditing = false }) => {
               />
               {fieldErrors.metro && <p className="text-red-600 text-sm mt-1">{fieldErrors.metro}</p>}
             </div>
-            
+
             <div>
               <label htmlFor="habitacion" className="block text-sm font-medium text-gray-700 mb-1">
                 Habitaciones *
@@ -295,7 +301,7 @@ const PropertyForm = ({ isEditing = false }) => {
               {fieldErrors.habitacion && <p className="text-red-600 text-sm mt-1">{fieldErrors.habitacion}</p>}
             </div>
           </div>
-          
+
           {/* Dirección */}
           <div>
             <label htmlFor="direccion" className="block text-sm font-medium text-gray-700 mb-1">
@@ -312,7 +318,7 @@ const PropertyForm = ({ isEditing = false }) => {
             />
             {fieldErrors.direccion && <p className="text-red-600 text-sm mt-1">{fieldErrors.direccion}</p>}
           </div>
-          
+
           {/* Tipo y operación */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -333,7 +339,7 @@ const PropertyForm = ({ isEditing = false }) => {
                 <option value="terreno">Terreno</option>
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="operacion" className="block text-sm font-medium text-gray-700 mb-1">
                 Operación *
@@ -350,7 +356,7 @@ const PropertyForm = ({ isEditing = false }) => {
                 <option value="alquiler">Alquiler</option>
               </select>
             </div>
-            
+
             <div className="flex items-center pt-6">
               <input
                 type="checkbox"
@@ -378,7 +384,7 @@ const PropertyForm = ({ isEditing = false }) => {
               </label>
             </div>
           </div>
-          
+
           {/* Descripción */}
           <div>
             <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
@@ -394,7 +400,7 @@ const PropertyForm = ({ isEditing = false }) => {
             ></textarea>
             {fieldErrors.descripcion && <p className="text-red-600 text-sm mt-1">{fieldErrors.descripcion}</p>}
           </div>
-          
+
           {/* Foto */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -411,9 +417,9 @@ const PropertyForm = ({ isEditing = false }) => {
               />
               {imagePreview && (
                 <div className="relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Vista previa" 
+                  <img
+                    src={imagePreview}
+                    alt="Vista previa"
                     className="w-24 h-24 object-cover border rounded"
                   />
                   <button
@@ -430,12 +436,13 @@ const PropertyForm = ({ isEditing = false }) => {
               )}
             </div>
             <p className="mt-1 text-sm text-gray-500">
+              {fieldErrors.foto && <span className="text-red-600">{fieldErrors.foto}</span>}
               {isEditing && !formData.foto && imagePreview
                 ? "Se conservará la imagen actual si no seleccionas una nueva"
-                : "Formatos recomendados: JPG, PNG. Máximo 2MB"}
+                : "Formatos recomendados: JPG, PNG. Máximo 5MB"}
             </p>
           </div>
-          
+
           {/* Botones */}
           <div className="flex justify-end space-x-3 pt-4">
             <Link
@@ -468,4 +475,4 @@ const PropertyForm = ({ isEditing = false }) => {
   );
 };
 
-export default PropertyForm; 
+export default PropertyForm;

@@ -5,6 +5,7 @@ import propertyService from './services/fixed-propertyService';
 import authService from './services/authService';
 import { getImageUrl } from './config';
 import contactService from './services/contactService';
+import { businessService } from './services';
 
 const BusinessDashboard = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const BusinessDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('properties');
+  const [requests, setRequests] = useState([]);
 
   // Verificar que el usuario está autenticado y es de tipo negocio
   useEffect(() => {
@@ -23,33 +25,33 @@ const BusinessDashboard = () => {
         console.log('INICIANDO VERIFICACIÓN EN BUSINESS DASHBOARD');
         console.log('URL actual:', window.location.pathname);
         console.log('==========================================');
-        
+
         const isAuth = authService.isAuthenticated();
         console.log('¿Usuario autenticado?', isAuth);
-        
+
         if (!isAuth) {
           console.log('Usuario no autenticado, redirigiendo a login');
           window.location.href = '/login';
           return;
         }
-        
+
         const currentUser = authService.getCurrentUser();
         console.log('Usuario actual en BusinessDashboard:', currentUser);
-        
+
         if (!currentUser) {
           console.error('No se encontraron datos de usuario a pesar de tener token');
           localStorage.removeItem('token'); // Limpiar token inválido
           window.location.href = '/login';
           return;
         }
-        
+
         console.log('Rol del usuario en dashboard:', currentUser.rol);
         if (currentUser.rol !== 'negocio') {
           console.log('Usuario no es de tipo negocio, redirigiendo a home');
           window.location.href = '/';
           return;
         }
-        
+
         // Si llegamos aquí, el usuario está autenticado y es de tipo negocio
         console.log('Verificación completada: Usuario autorizado para BusinessDashboard');
         setUser(currentUser);
@@ -60,7 +62,7 @@ const BusinessDashboard = () => {
         setLoading(false);
       }
     };
-    
+
     checkAuth();
   }, []);
 
@@ -82,7 +84,7 @@ const BusinessDashboard = () => {
           setLoading(false);
         }
       };
-      
+
       loadProperties();
     }
   }, [user]);
@@ -102,6 +104,18 @@ const BusinessDashboard = () => {
       loadContacts();
     }
   }, [user]);
+
+  useEffect(() => {
+    businessService.getAllBusinessRequests()
+      .then(data => {
+        setRequests(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Error al cargar las solicitudes');
+        setLoading(false);
+      });
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -145,8 +159,8 @@ const BusinessDashboard = () => {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
         <p className="text-red-500 mb-4">{error}</p>
-        <button 
-          onClick={() => navigate('/login')} 
+        <button
+          onClick={() => navigate('/login')}
           className="px-4 py-2 bg-blue-600 text-white rounded-md"
         >
           Volver a iniciar sesión
@@ -166,7 +180,7 @@ const BusinessDashboard = () => {
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm">Hola, {user?.name}</span>
-            <button 
+            <button
               onClick={handleLogout}
               className="text-sm bg-blue-700 hover:bg-blue-800 px-3 py-1 rounded-md transition"
             >
@@ -185,13 +199,13 @@ const BusinessDashboard = () => {
             <p className="text-3xl font-bold text-blue-600">{properties.length}</p>
             <p className="text-gray-500 mt-1">Propiedades publicadas</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-2 text-gray-800">Contactos</h2>
             <p className="text-3xl font-bold text-blue-600">{contacts.length}</p>
             <p className="text-gray-500 mt-1">Solicitudes de información</p>
           </div>
-          
+
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-2 text-gray-800">Sin leer</h2>
             <p className="text-3xl font-bold text-yellow-500">
@@ -200,7 +214,7 @@ const BusinessDashboard = () => {
             <p className="text-gray-500 mt-1">Mensajes pendientes</p>
           </div>
         </div>
-        
+
         {/* Pestañas */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="border-b border-gray-200">
@@ -225,7 +239,7 @@ const BusinessDashboard = () => {
               </button>
             </nav>
           </div>
-          
+
           <div className="p-6">
             {/* Contenido de Mis Propiedades */}
             {activeTab === 'properties' && (
@@ -239,7 +253,7 @@ const BusinessDashboard = () => {
                     + Añadir propiedad
                   </Link>
                 </div>
-                
+
                 {properties.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500 mb-4">No tienes propiedades publicadas</p>
@@ -278,10 +292,10 @@ const BusinessDashboard = () => {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="h-10 w-10 flex-shrink-0">
-                                  <img 
-                                    className="h-10 w-10 rounded-md object-cover" 
-                                    src={getImageUrl(property.foto)} 
-                                    alt={property.titulo} 
+                                  <img
+                                    className="h-10 w-10 rounded-md object-cover"
+                                    src={getImageUrl(property.foto)}
+                                    alt={property.titulo}
                                   />
                                 </div>
                                 <div className="ml-4">
@@ -309,7 +323,7 @@ const BusinessDashboard = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <div className="flex space-x-2">
-                                <Link 
+                                <Link
                                   to={`/editar-inmueble/${property.id}`}
                                   className="text-blue-600 hover:text-blue-900"
                                 >
@@ -321,7 +335,7 @@ const BusinessDashboard = () => {
                                 >
                                   Eliminar
                                 </button>
-                                <Link 
+                                <Link
                                   to={`/inmueble/${property.id}`}
                                   className="text-green-600 hover:text-green-900"
                                   target="_blank"
@@ -338,12 +352,12 @@ const BusinessDashboard = () => {
                 )}
               </div>
             )}
-            
+
             {/* Contenido de Contactos */}
             {activeTab === 'contacts' && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-6">Contactos Recibidos</h2>
-                
+
                 {contacts.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500 mb-4">No has recibido contactos todavía</p>
@@ -351,8 +365,8 @@ const BusinessDashboard = () => {
                 ) : (
                   <div className="space-y-4">
                     {contacts.map((contact) => (
-                      <div 
-                        key={contact.id} 
+                      <div
+                        key={contact.id}
                         className={`bg-white border rounded-lg p-4 ${!contact.leido ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200'}`}
                       >
                         <div className="flex justify-between items-start">
@@ -387,12 +401,12 @@ const BusinessDashboard = () => {
                 )}
               </div>
             )}
-            
+
             {/* Contenido de Mi Perfil */}
             {activeTab === 'profile' && (
               <div>
                 <h2 className="text-xl font-semibold text-gray-800 mb-6">Mi Perfil</h2>
-                
+
                 <div className="bg-white overflow-hidden border border-gray-200 rounded-lg">
                   <div className="px-4 py-5 sm:p-6">
                     <dl className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
@@ -400,12 +414,12 @@ const BusinessDashboard = () => {
                         <dt className="text-sm font-medium text-gray-500">Nombre</dt>
                         <dd className="mt-1 text-lg font-medium text-gray-900">{user?.name}</dd>
                       </div>
-                      
+
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Email</dt>
                         <dd className="mt-1 text-lg font-medium text-gray-900">{user?.email}</dd>
                       </div>
-                      
+
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Tipo de cuenta</dt>
                         <dd className="mt-1">
@@ -414,7 +428,7 @@ const BusinessDashboard = () => {
                           </span>
                         </dd>
                       </div>
-                      
+
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Propiedades publicadas</dt>
                         <dd className="mt-1 text-lg font-medium text-gray-900">{properties.length}</dd>
@@ -435,7 +449,7 @@ const BusinessDashboard = () => {
           </div>
         </div>
       </main>
-      
+
       {/* Pie de página */}
       <footer className="bg-blue-600 text-white py-4 mt-auto">
         <ul className="flex justify-center space-x-6">
@@ -448,4 +462,59 @@ const BusinessDashboard = () => {
   );
 };
 
-export default BusinessDashboard; 
+const BusinessRequestsAdmin = () => {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    businessService.getAllBusinessRequests()
+      .then(data => {
+        setRequests(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Error al cargar las solicitudes');
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <div className="max-w-5xl mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-6">Solicitudes de cuentas empresariales</h2>
+      {loading ? (
+        <p>Cargando solicitudes...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : requests.length === 0 ? (
+        <p className="text-gray-600">No hay solicitudes pendientes.</p>
+      ) : (
+        <div className="space-y-6">
+          {requests.map(req => (
+            <div key={req.id} className="bg-white rounded-lg shadow p-6 border-l-4 border-blue-600">
+              <div className="flex justify-between items-center mb-2">
+                <div>
+                  <span className="font-bold text-blue-700 text-lg">{req.company_name}</span>
+                  <span className="ml-4 text-gray-500">{new Date(req.created_at).toLocaleString()}</span>
+                </div>
+                <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-semibold">Pendiente</span>
+              </div>
+              <div className="mb-2"><b>Persona de contacto:</b> {req.contact_person}</div>
+              <div className="mb-2"><b>Email:</b> {req.email}</div>
+              {req.phone && <div className="mb-2"><b>Teléfono:</b> {req.phone}</div>}
+              {req.business_type && <div className="mb-2"><b>Tipo de negocio:</b> {req.business_type}</div>}
+              {req.employees && <div className="mb-2"><b>Empleados:</b> {req.employees}</div>}
+              {req.description && <div className="mb-2"><b>Descripción:</b> {req.description}</div>}
+              {req.services && (
+                <div className="mb-2"><b>Servicios:</b> {JSON.parse(req.services).join(', ')}</div>
+              )}
+              {/* Aquí puedes añadir botones para aprobar/rechazar */}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BusinessDashboard;

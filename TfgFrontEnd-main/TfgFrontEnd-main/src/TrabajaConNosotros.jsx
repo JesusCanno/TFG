@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { navigateToHome } from "./general";
+import authService from "./services/authService";
 
 const TrabajaConNosotros = () => {
   // Estado para el formulario
@@ -13,14 +14,14 @@ const TrabajaConNosotros = () => {
     mensaje: "",
     cv: null
   });
-  
+
   // Estado para mostrar mensaje de éxito
   const [enviado, setEnviado] = useState(false);
 
   // Manejar cambios en los inputs
   const handleChange = (e) => {
     const { name, value, type, files } = e.target;
-    
+
     if (type === 'file') {
       setFormData({
         ...formData,
@@ -39,11 +40,11 @@ const TrabajaConNosotros = () => {
     e.preventDefault();
     // Aquí iría la lógica para enviar el formulario a un backend
     console.log("Solicitud de empleo enviada:", formData);
-    
+
     // Simulamos el envío exitoso
     setEnviado(true);
     window.scrollTo(0, 0);
-    
+
     // Resetear el formulario después de 5 segundos
     setTimeout(() => {
       setFormData({
@@ -178,7 +179,9 @@ const TrabajaConNosotros = () => {
           </Link>
         </div>
         <div className="flex space-x-6">
-          <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          {authService.getUserRole() !== 'admin' && authService.getUserRole() !== 'negocio' && (
+            <Link to="/business" className="text-gray-600 hover:text-blue-600">¿Eres un negocio?</Link>
+          )}
           <Link to="/account" className="text-gray-600 hover:text-blue-600">Mi cuenta</Link>
         </div>
       </header>
@@ -209,11 +212,11 @@ const TrabajaConNosotros = () => {
             </div>
           </div>
         )}
-        
+
         {/* Beneficios de trabajar con nosotros */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">¿Por qué trabajar con nosotros?</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {beneficios.map((beneficio, index) => (
               <div key={index} className="bg-white p-6 rounded-lg shadow-md">
@@ -226,11 +229,11 @@ const TrabajaConNosotros = () => {
             ))}
           </div>
         </section>
-        
+
         {/* Ofertas de trabajo */}
         <section id="ofertas" className="mb-16 scroll-mt-24">
           <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Ofertas disponibles</h2>
-          
+
           <div className="space-y-6">
             {ofertas.map(oferta => (
               <div key={oferta.id} className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-600">
@@ -253,8 +256,8 @@ const TrabajaConNosotros = () => {
                   </div>
                 </div>
                 <p className="text-gray-600 mb-4">{oferta.descripcion}</p>
-                <a 
-                  href="#aplicar" 
+                <a
+                  href="#aplicar"
                   className="inline-block text-blue-600 font-semibold hover:text-blue-800 hover:underline"
                   onClick={() => {
                     setFormData({
@@ -270,11 +273,11 @@ const TrabajaConNosotros = () => {
             ))}
           </div>
         </section>
-        
+
         {/* Formulario de aplicación */}
         <section id="aplicar" className="bg-white p-8 rounded-lg shadow-lg scroll-mt-24">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Envía tu candidatura</h2>
-          
+
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
@@ -289,7 +292,7 @@ const TrabajaConNosotros = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-2">Email *</label>
                 <input
@@ -302,7 +305,7 @@ const TrabajaConNosotros = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="telefono" className="block text-gray-700 font-medium mb-2">Teléfono *</label>
                 <input
@@ -315,7 +318,7 @@ const TrabajaConNosotros = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="puesto" className="block text-gray-700 font-medium mb-2">Puesto al que aplicas *</label>
                 <select
@@ -333,7 +336,7 @@ const TrabajaConNosotros = () => {
                   <option value="otro">Otro (especificar en el mensaje)</option>
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="experiencia" className="block text-gray-700 font-medium mb-2">Años de experiencia *</label>
                 <select
@@ -352,7 +355,7 @@ const TrabajaConNosotros = () => {
                   <option value="10+">Más de 10 años</option>
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="cv" className="block text-gray-700 font-medium mb-2">Currículum (PDF) *</label>
                 <input
@@ -367,7 +370,7 @@ const TrabajaConNosotros = () => {
                 <p className="text-xs text-gray-500 mt-1">Solo archivos PDF. Máximo 5MB.</p>
               </div>
             </div>
-            
+
             <div className="mb-6">
               <label htmlFor="mensaje" className="block text-gray-700 font-medium mb-2">Carta de presentación o mensaje</label>
               <textarea
@@ -379,7 +382,7 @@ const TrabajaConNosotros = () => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
               ></textarea>
             </div>
-            
+
             <div className="flex items-center mb-6">
               <input
                 type="checkbox"
@@ -391,7 +394,7 @@ const TrabajaConNosotros = () => {
                 He leído y acepto la <Link to="/legal" className="text-blue-600 hover:underline">política de privacidad</Link> y autorizo el tratamiento de mis datos personales para la gestión de mi candidatura.
               </label>
             </div>
-            
+
             <button
               type="submit"
               className="bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600"
@@ -414,4 +417,4 @@ const TrabajaConNosotros = () => {
   );
 };
 
-export default TrabajaConNosotros; 
+export default TrabajaConNosotros;
