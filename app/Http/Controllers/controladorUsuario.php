@@ -156,6 +156,7 @@ class controladorUsuario extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,'.$user->id,
             'password' => 'sometimes|string|min:6',
+            'current_password' => 'required_with:password|string'
         ]);
 
         if ($validator->fails()) {
@@ -175,6 +176,13 @@ class controladorUsuario extends Controller
         }
 
         if ($request->has('password')) {
+            // Verificar la contraseña actual
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'status' => 0,
+                    'message' => 'La contraseña actual no es correcta'
+                ], 403);
+            }
             $user->password = Hash::make($request->password);
         }
 

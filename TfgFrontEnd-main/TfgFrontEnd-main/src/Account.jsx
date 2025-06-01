@@ -95,6 +95,14 @@ const Account = () => {
                             Información personal
                           </button>
                         </li>
+                        <li className={activeSection === "edit" ? "bg-blue-50 rounded-md" : ""}>
+                          <button
+                            className={`w-full text-left px-4 py-2 ${activeSection === "edit" ? "text-blue-600 font-medium" : "text-gray-700 hover:bg-gray-100 rounded-md"}`}
+                            onClick={() => setActiveSection("edit")}
+                          >
+                            Editar perfil
+                          </button>
+                        </li>
                         {userRole === 'negocio' && (
                           <li>
                             <Link to="/business-dashboard" className="w-full block text-left px-4 py-2 text-yellow-700 hover:bg-yellow-100 rounded-md font-semibold">
@@ -151,6 +159,10 @@ const Account = () => {
                           </div>
                         </div>
                       </div>
+                    )}
+
+                    {activeSection === "edit" && (
+                      <EditProfileSection userData={userData} setUserData={setUserData} />
                     )}
 
                     {activeSection === "favorites" && userRole === 'cliente' && (
@@ -242,11 +254,19 @@ function AdminUserPanel() {
     e.preventDefault();
     setFormError(null);
     try {
+      const userData = {
+        name: form.name,
+        email: form.email,
+        rol: form.rol
+      };
+      if (form.password && form.password.trim() !== "") {
+        userData.password = form.password;
+      }
       if (showCreate) {
-        await adminService.createUserByAdmin(form);
+        await adminService.createUserByAdmin(userData);
         setShowCreate(false);
       } else if (showEdit && selectedUser) {
-        await adminService.updateUserByAdmin(selectedUser.id, form);
+        await adminService.updateUserByAdmin(selectedUser.id, userData);
         setShowEdit(false);
       }
       fetchUsers();
@@ -411,6 +431,110 @@ function AdminBusinessRequests() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function EditProfileSection({ userData, setUserData }) {
+  const [name, setName] = useState(userData.name);
+  const [email, setEmail] = useState(userData.email);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  // Para el cambio de contraseña
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccess("");
+    setError("");
+    try {
+      await authService.updateUserProfile({ name, email });
+      setUserData((prev) => ({ ...prev, name, email }));
+      setSuccess("Perfil actualizado correctamente.");
+    } catch (err) {
+      setError("Error al actualizar el perfil.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPasswordSuccess("");
+    setPasswordError("");
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Por favor, completa todos los campos.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Las contraseñas nuevas no coinciden.");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      await authService.updateUserProfile({ current_password: currentPassword, password: newPassword });
+      setPasswordSuccess("Contraseña actualizada correctamente.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setPasswordError(err.response.data.message);
+      } else {
+        setPasswordError("Error al cambiar la contraseña.");
+      }
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-6">Editar perfil</h2>
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mb-10">
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Nombre</label>
+          <input type="text" className="w-full border rounded p-2" value={name} onChange={e => setName(e.target.value)} required />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Email</label>
+          <input type="email" className="w-full border rounded p-2" value={email} onChange={e => setEmail(e.target.value)} required />
+        </div>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled={loading}>
+          {loading ? "Guardando..." : "Guardar cambios"}
+        </button>
+        {success && <div className="text-green-600 mt-2">{success}</div>}
+        {error && <div className="text-red-600 mt-2">{error}</div>}
+      </form>
+
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Cambiar contraseña</h3>
+      <form onSubmit={handlePasswordChange} className="space-y-4 max-w-lg">
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Contraseña actual</label>
+          <input type="password" className="w-full border rounded p-2" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Nueva contraseña</label>
+          <input type="password" className="w-full border rounded p-2" value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
+        </div>
+        <div>
+          <label className="block text-gray-700 font-medium mb-2">Confirmar nueva contraseña</label>
+          <input type="password" className="w-full border rounded p-2" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required />
+        </div>
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled={passwordLoading}>
+          {passwordLoading ? "Guardando..." : "Cambiar contraseña"}
+        </button>
+        {passwordSuccess && <div className="text-green-600 mt-2">{passwordSuccess}</div>}
+        {passwordError && <div className="text-red-600 mt-2">{passwordError}</div>}
+      </form>
     </div>
   );
 }

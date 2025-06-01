@@ -115,6 +115,10 @@
             <div class="modal-body">
                 <form id="formCambiarPassword">
                     <div class="mb-3">
+                        <label for="actualPassword" class="form-label">Contraseña Actual</label>
+                        <input type="password" class="form-control" id="actualPassword" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="nuevaPassword" class="form-label">Nueva Contraseña</label>
                         <input type="password" class="form-control" id="nuevaPassword" required>
                     </div>
@@ -337,10 +341,11 @@
         // Función para cambiar contraseña
         async function cambiarPassword() {
             try {
+                const actualPassword = document.getElementById('actualPassword').value;
                 const nuevaPassword = document.getElementById('nuevaPassword').value;
                 const confirmarPassword = document.getElementById('confirmarPassword').value;
 
-                if (!nuevaPassword || !confirmarPassword) {
+                if (!actualPassword || !nuevaPassword || !confirmarPassword) {
                     alert('Por favor, completa todos los campos');
                     return;
                 }
@@ -360,6 +365,7 @@
                         'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
+                        current_password: actualPassword,
                         password: nuevaPassword
                     })
                 });

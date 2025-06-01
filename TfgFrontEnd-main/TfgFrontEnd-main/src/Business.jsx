@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { navigateToHome } from "./general";
 import { businessService } from './services';
 import authService from "./services/authService";
@@ -17,6 +17,8 @@ const Business = () => {
   });
 
   const [message, setMessage] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +45,10 @@ const Business = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!authService.isAuthenticated()) {
+      setShowLoginModal(true);
+      return;
+    }
     try {
       await businessService.sendBusinessRequest(formData);
       setMessage("Formulario enviado correctamente. Nos pondremos en contacto contigo pronto.");
@@ -402,6 +408,30 @@ const Business = () => {
           <li><Link to="/contacto" className="hover:text-yellow-300">Contacto</Link></li>
         </ul>
       </footer>
+
+      {/* Modal para login si no está autenticado */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">Inicia sesión para continuar</h3>
+            <p className="text-gray-600 mb-6">Para solicitar una cuenta de negocio, necesitas iniciar sesión o crear una cuenta.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { setShowLoginModal(false); navigate('/login'); }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              >
+                Iniciar sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
