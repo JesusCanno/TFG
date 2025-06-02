@@ -1,31 +1,31 @@
-# Imagen base con PHP y extensiones necesarias
 FROM php:8.2-cli
 
-# Instalar dependencias del sistema
+# Instala dependencias necesarias
 RUN apt-get update && apt-get install -y \
-    unzip \
-    git \
-    curl \
-    zip \
-    libzip-dev \
-    libpq-dev \
-    libonig-dev \
-    && docker-php-ext-install pdo pdo_mysql zip
+    unzip git curl zip libzip-dev libonig-dev libpq-dev nodejs npm \
+    && docker-php-ext-install zip pdo pdo_mysql
 
-# Instalar Composer
+# Instala Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Crear directorio de la app
-WORKDIR /app
+# Establece el directorio de trabajo
+WORKDIR /var/www/html
 
-# Copiar archivos
+# Copia todo el código
 COPY . .
 
-# Instalar dependencias PHP (Laravel)
+# Instala dependencias PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Puerto para Laravel (Render espera este puerto)
+# Instala dependencias JS y compila frontend
+RUN npm install && npm run build
+
+# Copia el archivo .env (en Render deberás configurarlo en variables de entorno)
+# y genera la clave de la app
+RUN php artisan config:clear && php artisan key:generate
+
+# Expone el puerto (Render escucha por 10000)
 EXPOSE 10000
 
-# Comando de inicio
+# Inicia Laravel
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]
