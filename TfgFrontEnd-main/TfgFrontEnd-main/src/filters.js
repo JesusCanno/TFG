@@ -54,7 +54,8 @@ export function filterApartments(apartments, filters, searchTerm = "") {
     }
 
     // Solo mostrar inmuebles publicados
-    if (apartment.activo !== true && apartment.activo !== 1) {
+    const activoValido = apartment.activo === true || apartment.activo === 1 || apartment.activo === '1' || apartment.activo === 'true';
+    if (!activoValido) {
       return false;
     }
 

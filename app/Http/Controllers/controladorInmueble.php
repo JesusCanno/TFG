@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Inmueble;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class controladorInmueble extends Controller
 {
@@ -53,11 +54,10 @@ class controladorInmueble extends Controller
         // Manejo de la imagen
         $rutaImagen = null;
         if ($request->hasFile('foto')) {
-            $imagen = $request->file('foto');
-            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
-            $rutaImagen = $imagen->storeAs('public/inmuebles', $nombreImagen);
-            // Convertimos la ruta para que sea accesible públicamente
-            $rutaImagen = Storage::url($rutaImagen);
+            $uploadedFileUrl = Cloudinary::upload($request->file('foto')->getRealPath(), [
+                'folder' => 'inmuebles'
+            ])->getSecurePath();
+            $rutaImagen = $uploadedFileUrl;
         }
 
         $inmueble = Inmueble::create([
@@ -178,17 +178,11 @@ class controladorInmueble extends Controller
 
         // Manejo de la imagen
         if ($request->hasFile('foto')) {
-            // Eliminar imagen anterior si existe
-            if ($inmueble->foto && Storage::exists(str_replace('/storage', 'public', $inmueble->foto))) {
-                Storage::delete(str_replace('/storage', 'public', $inmueble->foto));
-            }
-
-            // Subir nueva imagen
-            $imagen = $request->file('foto');
-            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
-            $rutaImagen = $imagen->storeAs('public/inmuebles', $nombreImagen);
-            // Convertimos la ruta para que sea accesible públicamente
-            $inmueble->foto = Storage::url($rutaImagen);
+            // Eliminar imagen anterior si existe (no aplicable en Cloudinary a menos que guardes el public_id)
+            $uploadedFileUrl = Cloudinary::upload($request->file('foto')->getRealPath(), [
+                'folder' => 'inmuebles'
+            ])->getSecurePath();
+            $inmueble->foto = $uploadedFileUrl;
         }
 
         $inmueble->tipo = $request->tipo;
@@ -243,17 +237,11 @@ class controladorInmueble extends Controller
 
         // Manejo de la imagen
         if ($request->hasFile('foto')) {
-            // Eliminar imagen anterior si existe
-            if ($inmueble->foto && Storage::exists(str_replace('/storage', 'public', $inmueble->foto))) {
-                Storage::delete(str_replace('/storage', 'public', $inmueble->foto));
-            }
-
-            // Subir nueva imagen
-            $imagen = $request->file('foto');
-            $nombreImagen = time() . '_' . $imagen->getClientOriginalName();
-            $rutaImagen = $imagen->storeAs('public/inmuebles', $nombreImagen);
-            // Convertimos la ruta para que sea accesible públicamente
-            $inmueble->foto = Storage::url($rutaImagen);
+            // Eliminar imagen anterior si existe (no aplicable en Cloudinary a menos que guardes el public_id)
+            $uploadedFileUrl = Cloudinary::upload($request->file('foto')->getRealPath(), [
+                'folder' => 'inmuebles'
+            ])->getSecurePath();
+            $inmueble->foto = $uploadedFileUrl;
         }
 
         if($request->has("tipo")){
