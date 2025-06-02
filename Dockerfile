@@ -20,8 +20,10 @@ RUN composer install --no-dev --optimize-autoloader
 # Instala dependencias JS y compila frontend
 RUN npm install && npm run build
 
-# Copia el archivo .env (en Render deberás configurarlo en variables de entorno)
-# y genera la clave de la app
+# Copia archivo .env para que exista antes de ejecutar artisan
+RUN cp .env.example .env
+
+# Limpia configuración cache y genera la clave de la app
 RUN php artisan config:clear && php artisan key:generate
 
 # Expone el puerto (Render escucha por 10000)
